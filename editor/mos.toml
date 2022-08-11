@@ -1,0 +1,16 @@
+[build]
+entry = "main.asm"
+target-directory = "target"
+listing = true
+symbols = ["vice"]
+output-format = "prg"
+
+[formatting]
+mnemonics.casing = 'lowercase'
+mnemonics.register-casing = 'lowercase'
+braces.position = 'new-line'
+whitespace.indent = 4
+whitespace.label-margin = 4
+whitespace.label-alignment = 'right'
+whitespace.code-margin = 30
+listing.num-bytes-per-line = 8

@@ -1,0 +1,671 @@
+
+13.4.1 Memory get (0x01)		0x01: MON_RESPONSE_MEM_GET
+13.4.2 Memory set (0x02)		0x02: MON_RESPONSE_MEM_SET
+
+13.4.3 Checkpoint get (0x11)	13.5.1 Checkpoint Response (0x11)
+13.4.4 Checkpoint set (0x12)	13.5.1 Checkpoint Response (0x11)
+13.4.5 Checkpoint delete (0x13)	0x13: MON_RESPONSE_CHECKPOINT_DELETE
+13.4.6 Checkpoint list (0x14)	0x14: MON_RESPONSE_CHECKPOINT_LIST
+13.4.7 Checkpoint toggle (0x15)	0x15: MON_RESPONSE_CHECKPOINT_TOGGLE
+13.4.8 Condition set (0x22)		0x22: MON_RESPONSE_CONDITION_SET
+
+13.4.9  Registers get (0x31)	13.5.2 Register Response (0x31)
+13.4.10 Registers set (0x32)	13.5.2 Register Response (0x31)
+
+13.4.11 Dump (0x41)				0x41: MON_RESPONSE_DUMP
+13.4.12 Undump (0x42)			0x42: MON_RESPONSE_UNDUMP
+
+13.4.13 Resource Get (0x51)		0x51: MON_RESPONSE_RESOURCE_GET
+13.4.14 Resource Set (0x52)		0x52: MON_RESPONSE_RESOURCE_SET
+
+13.4.15 Advance Instructions (0x71)	0x71: MON_RESPONSE_ADVANCE_INSTRUCTIONS
+
+13.4.16 Keyboard feed (0x72)		0x72: MON_RESPONSE_KEYBOARD_FEED
+
+13.4.17 Execute until return (0x73)	0x73: MON_RESPONSE_EXECUTE_UNTIL_RETURN
+
+13.4.18 Ping (0x81)					0x81: MON_RESPONSE_PING
+
+13.4.19 Banks available (0x82)		0x82: MON_RESPONSE_BANKS_AVAILABLE
+13.4.20 Registers available (0x83)	0x82: MON_RESPONSE_REGISTERS_AVAILABLE
+
+13.4.21 Display Get (0x84)			0x84: MON_RESPONSE_DISPLAY_GET
+
+13.4.22 VICE info (0x85)			0x85: MON_RESPONSE_VICE_INFO
+
+13.4.23 Palette get (0x91)			0x91: MON_RESPONSE_PALETTE_GET
+
+13.4.24 Joyport set (0xa2)			0xa2: MON_RESPONSE_JOYPORT_SET
+13.4.25 Userport set (0xb2)			0xb2: MON_RESPONSE_USERPORT_SET
+
+13.4.26 Exit (0xaa)					0xaa: MON_RESPONSE_EXIT
+13.4.27 Quit (0xbb)					0xbb: MON_RESPONSE_QUIT
+13.4.28 Reset (0xcc)				0xcc: MON_RESPONSE_RESET
+13.4.29 Autostart / autoload (0xdd)		0xdd: MON_RESPONSE_AUTOSTART
+
+-- 13.5 Responses --
+
+13.5.1 Checkpoint Response (0x11)	0x11: MON_RESPONSE_CHECKPOINT_INFO
+13.5.2 Register Response (0x31)		0x31: MON_RESPONSE_REGISTER_INFO
+
+13.5.3 JAM Response (0x61)			0x61: MON_RESPONSE_JAM
+13.5.4 Stopped Response (0x62)		0x62: MON_RESPONSE_STOPPED
+13.5.5 Resumed Response (0x63)		0x63: MON_RESPONSE_RESUMED
+
+
+------------------------
+
+13.4.1 Memory get (0x01)
+	Reads a chunk of memory from a start address to an end address (inclusive).
+
+	Command body:
+
+	byte 0: side effects?
+	Should the read cause side effects?
+	byte 1-2: start address
+	byte 3-4: end address
+	byte 5: memspace
+	Describes which part of the computer you want to read:
+		0x00: main memory
+		0x01: drive 8
+		0x02: drive 9
+		0x03: drive 10
+		0x04: drive 11
+	byte 6-7: bank ID
+	Describes which bank you want. This is dependent on your machine. See section 13.4.19 Banks available (0x82). If the memspace selected doesn't support banks, this value is ignored.
+	Response type:
+
+	0x01: MON_RESPONSE_MEM_GET
+
+	Response body:
+
+	byte 0-1: The length of the memory segment.
+	byte 2+: The memory at the address.
+
+13.4.2 Memory set (0x02)
+	Writes a chunk of memory from a start address to an end address (inclusive).
+
+	Command body:
+
+	byte 0: side effects?
+	Should the write cause side effects?
+	byte 1-2: start address
+	byte 3-4: end address
+	byte 5: memspace
+	Describes which part of the computer you want to write:
+		0x00: main memory
+		0x01: drive 8
+		0x02: drive 9
+		0x03: drive 10
+		0x04: drive 11
+	byte 6-7: bank ID
+	Describes which bank you want. This is dependent on your machine. See section 13.4.19 Banks available (0x82). If the memspace selected doesn't support banks, this byte is ignored.
+	byte 8+: Memory contents to write
+	Response type:
+
+	0x02: MON_RESPONSE_MEM_SET
+
+	Response body:
+
+	Currently empty.
+
+13.4.3 Checkpoint get (0x11)
+	Gets any type of checkpoint. (break, watch, trace)
+
+	Command body:
+
+	byte 0-3: checkpoint number
+	See section 13.5.1 Checkpoint Response (0x11).
+
+13.4.4 Checkpoint set (0x12)
+	Sets any type of checkpoint. This combines the functionality of several textual commands (break, watch, trace) into one, as they are all the same with only minor variations. To set conditions, see section 13.4.8 Condition set (0x22) after executing this one.
+
+	Command body:
+
+	byte 0-1: start address
+	byte 2-3: end address
+	byte 4: stop when hit
+		0x01: true, 0x00: false
+	byte 5: enabled
+		0x01: true, 0x00: false
+	byte 6: CPU operation
+		0x01: load, 0x02: store, 0x04: exec
+	byte 7: temporary
+	Deletes the checkpoint after it has been hit once. This is similar to "until" command, but it will not resume the emulator.
+	byte 8 (optional): memspace
+	Describes which part of the computer to checkpoint:
+		0x00: main memory
+		0x01: drive 8
+		0x02: drive 9
+		0x03: drive 10
+		0x04: drive 11
+	See section 13.5.1 Checkpoint Response (0x11).
+
+13.4.5 Checkpoint delete (0x13)
+	Deletes any type of checkpoint. (break, watch, trace)
+
+	Command body:
+
+	byte 0-3: checkpoint number
+	Response type:
+
+	0x13: MON_RESPONSE_CHECKPOINT_DELETE
+
+	Response body:
+
+	Currently empty.
+
+13.4.6 Checkpoint list (0x14)
+	Command body:
+
+	Currently empty.
+
+	Response type:
+
+	Emits a series of MON_RESPONSE_CHECKPOINT_INFO responses (see section 13.5.1 Checkpoint Response (0x11)) followed by
+
+	0x14: MON_RESPONSE_CHECKPOINT_LIST
+
+	Response body:
+
+	byte 0-3: The total number of checkpoints
+	
+13.4.7 Checkpoint toggle (0x15)
+
+	Command body:
+
+	byte 0-3: Checkpoint number
+	byte 4: Enabled?
+		0x00: disabled, 0x01: enabled
+	Response type:
+
+	0x15: MON_RESPONSE_CHECKPOINT_TOGGLE
+
+	Response body:
+
+	Currently empty.
+
+13.4.8 Condition set (0x22)
+	Sets a condition on an existing checkpoint. It is not currently possible to retrieve conditions after setting them.
+
+	Command body:
+
+	byte 0-3: checkpoint number
+	byte 4: condition expression length
+	byte 5+: condition expression string
+	This is the same format used on the command line. Not null terminated.
+	Response type:
+
+	0x22: MON_RESPONSE_CONDITION_SET
+
+	Response body:
+
+	Currently empty.
+
+13.4.9 Registers get (0x31)
+	Get details about the registers
+
+	Command body:
+
+	byte 0: memspace
+	Describes which part of the computer you want to read:
+		0x00: main memory
+		0x01: drive 8
+		0x02: drive 9
+		0x03: drive 10
+		0x04: drive 11
+	See section 13.5.2 Register Response (0x31).
+
+13.4.10 Registers set (0x32)
+	Set the register values
+
+	Command body:
+
+	byte 0: memspace
+	Describes which part of the computer you want to write:
+		0x00: main memory
+		0x01: drive 8
+		0x02: drive 9
+		0x03: drive 10
+		0x04: drive 11
+	byte 1-2: The count of the array items
+	byte 3+: An array with items of structure:
+		byte 0: Size of the item, excluding this byte
+		byte 1: ID of the register
+		byte 2-3: register value
+	See section 13.5.2 Register Response (0x31).
+
+13.4.11 Dump (0x41)
+	Saves the machine state to a file.
+
+	Command body:
+
+	byte 0: Save ROMs to snapshot file?
+		0x01: true, 0x00: false
+	byte 1: Save disks to snapshot file?
+		0x01: true, 0x00: false
+	byte 2: Length of filename
+	byte 3+: Filename
+	The filename to save the snapshot to.
+	Response type:
+
+	0x41: MON_RESPONSE_DUMP
+
+	Response body:
+
+	Currently empty.
+
+13.4.12 Undump (0x42)
+	Loads the machine state from a file.
+
+	Command body:
+
+	byte 0: Length of filename
+	byte 1+: Filename
+	The filename to load the snapshot from.
+	Response type:
+
+	0x42: MON_RESPONSE_UNDUMP
+
+	Response body:
+
+	byte 0-1: The current program counter position
+
+13.4.13 Resource Get (0x51)
+	Get a resource value from the emulator. See section 6.1 Format of resource files.
+
+	Command body:
+
+	byte 0: Length of resource name
+	byte 1+: Resource name
+	Response type:
+
+	0x51: MON_RESPONSE_RESOURCE_GET
+
+	Response body:
+
+	byte 0: Type of the resource
+		0x00: String, 0x01: Integer
+	byte 1: Length of the value
+	byte 2+: The value
+
+13.4.14 Resource Set (0x52)
+	Set a resource value in the emulator. See section 6.1 Format of resource files.
+
+	Command body:
+
+	1 byte: Type of the resource value
+		0x00: String, 0x01: Integer
+		Strings will be interpreted if the destination is an Integer.
+	1 byte: Resource name length = (&name)
+		(*name) bytes: The resource name
+	1 byte: Resource value length = (&value)
+		(*value) bytes: The resource value
+	Response type:
+
+	0x52: MON_RESPONSE_RESOURCE_SET
+
+	Response body:
+
+	Currently empty.
+
+13.4.15 Advance Instructions (0x71)
+	Step over a certain number of instructions.
+
+	Command body:
+
+	byte 0: Step over subroutines?
+	Should subroutines count as a single instruction?
+	byte 1-2: How many instructions to step over.
+	Response type:
+
+	0x71: MON_RESPONSE_ADVANCE_INSTRUCTIONS
+
+	Response body:
+
+	Currently empty.
+
+13.4.16 Keyboard feed (0x72)
+	Add text to the keyboard buffer.
+
+	Command body:
+
+	byte 0: Length of text
+	byte 1+: The text, in PETSCII
+	Response type:
+
+	0x72: MON_RESPONSE_KEYBOARD_FEED
+
+	Response body:
+
+	Currently empty.
+
+13.4.17 Execute until return (0x73)
+	Continues execution and returns to the monitor just after the next RTS or RTI is executed.
+
+	This command is the same as "return" in the text monitor.
+
+	Command body:
+
+	Currently empty.
+
+	Response type:
+
+	0x73: MON_RESPONSE_EXECUTE_UNTIL_RETURN
+
+	Response body:
+
+	Currently empty.
+
+13.4.18 Ping (0x81)
+	Get an empty response
+
+	Command body:
+
+	Always empty
+
+	Response type:
+
+	0x81: MON_RESPONSE_PING
+
+	Response body:
+
+	Always empty
+
+13.4.19 Banks available (0x82)
+	Gives a listing of all the bank IDs for the running machine with their names.
+
+	Command body:
+
+	Currently empty.
+
+	Response type:
+
+	0x82: MON_RESPONSE_BANKS_AVAILABLE
+
+	Response body:
+
+	byte 0-1: The count of the array items
+	byte 2+: An array with items of structure:
+	byte 0: Size of the item, excluding this byte
+	byte 1-2: bank ID
+	byte 3: Name length
+	byte 4+: Name
+
+13.4.20 Registers available (0x83)
+	Gives a listing of all the registers for the running machine with their names.
+
+	Command body:
+
+	byte 0: memspace
+	Describes which part of the computer you want to read:
+		0x00: main memory
+		0x01: drive 8
+		0x02: drive 9
+		0x03: drive 10
+		0x04: drive 11
+	Response type:
+
+	0x82: MON_RESPONSE_REGISTERS_AVAILABLE
+
+	Response body:
+
+	byte 0-1: The count of the array items
+	byte 2+: An array with items of structure:
+	byte 0: Size of the item, excluding this byte
+	byte 1: ID of the register
+	byte 2: Size of the register in bits
+	byte 3: Length of name
+	byte 4+: Name
+
+13.4.21 Display Get (0x84)
+	Gets the current screen in a requested bit format.
+
+	Command body:
+
+	byte 0: USE VIC-II?
+	Must be included, but ignored for all but the C128. If true, (0x01) the screen returned will be from the VIC-II. If false (0x00), it will be from the VDC.
+	byte 1: Format
+	0x00: Indexed, 8 bit
+	Response type:
+
+	0x84: MON_RESPONSE_DISPLAY_GET
+
+	Response body:
+
+	4 bytes: Length of the fields before the display buffer
+	2 bytes: Debug width of display buffer (uncropped)
+	The largest width the screen gets.
+	2 bytes: Debug height of display buffer (uncropped)
+	The largest height the screen gets.
+	2 bytes: X offset
+	X offset to the inner part of the screen.
+	2 bytes: Y offset
+	Y offset to the inner part of the screen.
+	2 bytes: Width of the inner part of the screen.
+	2 bytes: Height of the inner part of the screen.
+	1 byte: Bits per pixel of display buffer, 8
+	4 bytes: Length of display buffer = (&buffer)
+	(*buffer) bytes: Display buffer data
+
+13.4.22 VICE info (0x85)
+	Get general information about VICE. Currently returns the versions.
+
+	Command body:
+
+	Always empty
+
+	Response type:
+
+	0x85: MON_RESPONSE_VICE_INFO
+
+	Response body:
+
+	1 byte: Length of main version = (&main)
+	(*main) bytes: Main version
+	In linear format. For example 0x03, 0x05, 0x00, 0x00 for 3.5.0.0
+	1 byte: Length of SVN revision = (&rev)
+	(*rev) bytes: SVN revision
+	In little endian format. Returns zero if it's not an SVN build.
+
+13.4.23 Palette get (0x91)
+	Get the colors in the current palette
+
+	Command body:
+
+	byte 0: USE VIC-II?
+	Must be included, but ignored for all but the C128. If true, (0x01) the screen returned will be from the VIC-II. If false (0x00), it will be from the VDC.
+	Response type:
+
+	0x91: MON_RESPONSE_PALETTE_GET
+
+	Response body:
+
+	byte 0-1: The number of palette items.
+	byte 2+: An array with items of structure:
+	byte 0: Size of the item, excluding this byte
+	byte 1: Red
+	byte 2: Green
+	byte 3: Blue
+
+13.4.24 Joyport set (0xa2)
+	Set the simulated joyport value.
+
+	Command body:
+
+	byte 0-1: The port to set the value on
+	byte 2-3: The value to set
+	Response type:
+
+	0xa2: MON_RESPONSE_JOYPORT_SET
+
+	Response body:
+
+	Currently empty.
+
+13.4.25 Userport set (0xb2)
+	Set the simulated userport value.
+
+	Command body:
+
+	byte 0-1: The value to set
+	Response type:
+
+	0xb2: MON_RESPONSE_USERPORT_SET
+
+	Response body:
+
+	Currently empty.
+
+13.4.26 Exit (0xaa)
+	Exit the monitor until the next breakpoint.
+
+	Command body:
+
+	Currently empty.
+
+	Response type:
+
+	0xaa: MON_RESPONSE_EXIT
+
+	Response body:
+
+	Currently empty.
+
+13.4.27 Quit (0xbb)
+	Quits VICE.
+
+	Command body:
+
+	Currently empty.
+
+	Response type:
+
+	0xbb: MON_RESPONSE_QUIT
+
+	Response body:
+
+	Currently empty.
+
+13.4.28 Reset (0xcc)
+	Reset the system or a drive
+
+	Command body:
+
+	byte 0: What to reset
+		0x00: Soft reset system
+		0x01: Hard reset system
+		0x08 - 0x0b: Reset drives 8 - 11
+	Response type:
+
+	0xcc: MON_RESPONSE_RESET
+
+	Response body:
+
+	Currently empty.
+
+13.4.29 Autostart / autoload (0xdd)
+	Load a program then return to the monitor
+
+	Command body:
+
+	byte 0: Run after loading?
+		0x01: true, 0x00: false
+	byte 1-2: File index
+	The index of the file to execute, if a disk image. 0x00 is the default value.
+	byte 3: Length of filename
+	byte 4+: Filename
+	The filename to autoload.
+	Response type:
+
+	0xdd: MON_RESPONSE_AUTOSTART
+
+	Response body:
+
+	Currently empty.
+
+13.5 Responses
+These responses are generated by many different commands, or by certain events. Events are generated with a request ID of 0xffffffff, so that they can be easily distinguished from regular requests.
+
+13.5.1 Checkpoint Response (0x11)
+	This response is generated by hitting a checkpoint, or by many of the checkpoint commands.
+
+	See section 13.4.3 Checkpoint get (0x11).
+	See section 13.4.4 Checkpoint set (0x12).
+	See section 13.4.6 Checkpoint list (0x14).
+
+	Response type:
+
+	0x11: MON_RESPONSE_CHECKPOINT_INFO
+
+	Response body:
+
+	byte 0-3: Checkpoint number
+	byte 4: Currently hit?
+		0x01: true, 0x00: false
+	byte 5-6: start address
+	byte 7-8: end address
+	byte 9: stop when hit
+		0x01: true, 0x00: false
+	byte 10: enabled
+		0x01: true, 0x00: false
+	byte 11: CPU operation
+		0x01: load, 0x02: store, 0x04: exec
+	byte 12: temporary
+	Deletes the checkpoint after it has been hit once. This is similar to "until" command, but it will not resume the emulator.
+	byte 13-16: hit count
+	byte 17-20: ignore count
+	byte 21: Has condition?
+		0x01: true, 0x00: false
+	byte 22: memspace
+		0x00: main memory
+		0x01: drive 8
+		0x02: drive 9
+		0x03: drive 10
+		0x04: drive 11
+	
+13.5.2 Register Response (0x31)
+	Response type:
+
+	0x31: MON_RESPONSE_REGISTER_INFO
+
+	Response body:
+
+	byte 0-1: The count of the array items
+	byte 2+: An array with items of structure:
+	byte 0: Size of the item, excluding this byte
+	byte 1: ID of the register
+	byte 2-3: register value
+
+13.5.3 JAM Response (0x61)
+	When the CPU jams
+
+	Response type:
+
+	0x61: MON_RESPONSE_JAM
+
+	Response body:
+
+	byte 0-1: The current program counter position
+
+13.5.4 Stopped Response (0x62)
+	When the machine stops for the monitor, either due to hitting a checkpoint or stepping.
+
+	Response type:
+
+	0x62: MON_RESPONSE_STOPPED
+
+	Response body:
+
+	byte 0-1: The current program counter position
+
+13.5.5 Resumed Response (0x63)
+	When the machine resumes execution for any reason.
+
+	Response type:
+
+	0x63: MON_RESPONSE_RESUMED
+
+	Response body:
+
+	byte 0-1: The current program counter position
