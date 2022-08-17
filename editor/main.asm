@@ -1014,9 +1014,8 @@ create_lantern_records:
         sta zp_lantern_row
 
     L3: inc zp_lantern_row
-        //inc zp_lantern_row
         lda zp_lantern_row
-        cmp #$0c                      // $0A is last row
+        cmp #$0c                      // $0a is last row
         beq L4                        // rts
 
         ldx zp_lantern_row
@@ -1075,9 +1074,11 @@ create_lantern_records:
         sta lantern_records           // length 1st byte
         rts
     }
+    
     // compressor
     // jsr Create Lant Recs after finished compiling level
     // F8 = #$8C
+    
 Compress:                         // SEI
 
     lda #$27
@@ -1128,6 +1129,7 @@ Nor:
     sta zpRecStore1
     jsr IncScrnPtr
     bne Nor
+    
 NorOut:
 
     dex
@@ -1145,6 +1147,7 @@ Repeater:
     bmi RepOut
     jsr IncScrnPtr
     beq Repeater
+    
 RepOut:
 
     txa
@@ -1161,8 +1164,10 @@ End:
     sta (LevelPtr), y
     jsr create_lantern_records
     rts
+    
     // first byte of lantern_records = length
     // zpLevelLo/Hi = End Adr
+    
 IncScrnPtr:
 
     dec zpRowCount
@@ -1234,6 +1239,7 @@ IncLevPtr:
     inc zpLevelLo
     bne LevPtrOut
     inc zpLevelHi
+    
 LevPtrOut:
 
     rts

@@ -1,13 +1,13 @@
 package main
 
 const (
-	editor_compressed_level = 0xc700
-	editor_lantern_set      = 0xc900 /// first byte is length + 1 ?
-	editor_screen           = 0x0478
-	editor_screen_length    = 880
-	editor_color            = 0xd878
-	editor_color_length     = 904
-
+	editor_compressed_level_addr = 0xc700
+	editor_lantern_set_addr      = 0xc900 /// first byte is length + 1 ?
+	editor_screen_addr           = 0x0478
+	editor_screen_length         = 880
+	editor_color_addr            = 0xd878
+	editor_color_length          = 904
+	editor_cset_addr             = 0x3800
 	/// cset123 a000, a800 b000
 )
 
@@ -21,7 +21,6 @@ const (
 	game_lantern_data     = 0x4d0a /// ?c /// - 4e94 $188 LEN(392)
 
 	/// wait time bruce yamo ninja (per lvl)
-	/// facing 2 3 4 5 (from door) T B L R
 
 	/// Color
 	game_color_pointers = 0x4809 /// $480b lo/hi 20 start @ $47c8

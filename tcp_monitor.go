@@ -8,6 +8,15 @@ import (
 	"time"
 )
 
+func memory_get(start_address uint16, length int) []byte {
+	resp := send_command(command_memory_get(start_address, length), RESPONSE_MEM_GET)
+	return resp
+}
+
+func memory_set(start_address uint16, content []byte) {
+	send_command(command_memory_set(start_address, content))
+}
+
 func display_get() []byte {
 	return create_command(0x84, []byte{1, 0})
 }
@@ -16,7 +25,7 @@ func palette_get() []byte { /// no 0x91 response
 	return create_command(0x91, []byte{1})
 }
 
-func memory_get(start_address uint16, length int) []byte {
+func command_memory_get(start_address uint16, length int) []byte {
 	side_effects := byte(1)
 	end_address := uint16(0)
 	if end_address == 0 {
@@ -34,7 +43,7 @@ func memory_get(start_address uint16, length int) []byte {
 	return create_command(0x01, b)
 }
 
-func memory_set(start_address uint16, content []byte) []byte {
+func command_memory_set(start_address uint16, content []byte) []byte {
 	side_effects := byte(0)
 	bank := uint16(0)
 	memspace := byte(0)
@@ -81,7 +90,7 @@ func send_command(cmd []byte, rc ...resp_code) []byte {
 
 	data := []byte{}
 	if rc != nil {
-		time.Sleep(time.Duration(1) * time.Second)
+		time.Sleep(tcp_wait)
 		resp := step(conn)
 		for _, r := range resp {
 			if int(r.Req) == int(rc[0]) {
@@ -139,9 +148,7 @@ func response_mem_get(resp []byte) []byte {
 
 func load_file_memory(path, filename string, start_address uint16) {
 	content := load_file(path, filename, false)
-	cmd := memory_set(start_address, content)
-	println(filename, len(content))
-	send_command(cmd)
+	memory_set(start_address, content)
 }
 
 func load_file(path, filename string, skip_load_addr bool) []byte {

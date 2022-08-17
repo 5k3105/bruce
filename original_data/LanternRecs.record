@@ -1,0 +1,4 @@
+s "LanternCounts" 0 4cce 4ce1
+s "LanternPointers" 0 4ce2 4d0b
+s "LanternData" 0 4d0c 4e8f
+stop

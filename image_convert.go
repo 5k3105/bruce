@@ -23,6 +23,13 @@ buffer_len:         [94848]
 
 */
 
+func screenshot() {
+	buffer_size = 150000
+	display := send_command(display_get(), RESPONSE_DISPLAY_GET)
+	raw_to_png("./img/", level, display)
+	buffer_size = 50000
+}
+
 func raw_to_png(path, filename string, data []byte) {
 	data = append(data, []byte{0, 0, 0, 0}...)
 	width := 384

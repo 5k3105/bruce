@@ -11,7 +11,7 @@ const (
 )
 
 func read_enemy_table() ([]byte, []byte) { /// generate_doors_bin
-	path := `./map/`
+	path := map_path
 	data := load_file(path, "enemy.txt", false)
 	lines, header := read_text_lines(data, "[")
 	schema_seq := read_schema(header)

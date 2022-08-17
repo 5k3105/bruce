@@ -7,7 +7,7 @@ import (
 /// split original dataset using pointer files
 
 func split_linked_files() {
-	path := `./original_dataset/`
+	path := `./map_original/`
 
 	dataset := split_linked_data_byte("LevelPointers", "LevelData", game_level_slots)
 	for i, data := range dataset {

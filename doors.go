@@ -28,7 +28,7 @@ sprite-pos:
 */
 
 func read_doors_table() ([]byte, []byte) { /// generate_doors_bin
-	path := `./map/`
+	path := map_path
 	data := load_file(path, "doors.txt", false)
 	lines, header := read_text_lines(data, "[")
 	schema_seq := read_schema(header)
@@ -43,8 +43,7 @@ func read_schema(heading string) []string {
 	if heading[len(heading)-1:] == "]" {
 		heading = heading[:len(heading)-1]
 	}
-	lf := ","
-	lines := strings.Split(heading, lf)
+	lines := strings.Split(heading, ",")
 
 	var schema_seq []string
 	for _, l := range lines {
@@ -108,8 +107,8 @@ func parse_door_map(keymap map[string][]string) (next_level, sprite_pos []byte) 
 				sprite_posy = append(sprite_posy, byte(0))
 			}
 		}
-		sprite_pos = append(sprite_pos, sprite_posy...)
 		sprite_pos = append(sprite_pos, sprite_posx...)
+		sprite_pos = append(sprite_pos, sprite_posy...)
 	}
 	return next_level, sprite_pos
 }
@@ -126,9 +125,9 @@ func htob(h string) byte {
 }
 
 func read_doors_bin() {
-	path := `./data/`
-	sprite_pos := load_file(path, "sprite_pos", false)
-	next_level := load_file(path, "next_level", false)
+	path := map_path
+	sprite_pos := load_file(path, "doors_player_pos", false)
+	next_level := load_file(path, "doors_next_level", false)
 	field_seq := []string{"level", "door", "next-level", "x", "y"}
 	output_lines := generate_doors_text(next_level, sprite_pos, field_seq)
 	doors_text := strings.Join(output_lines, "\n")
@@ -142,7 +141,7 @@ func generate_doors_text(next_level, sprite_pos []byte, field_seq []string) []st
 	format := "%d\t%d\t%d\t%x\t%x"
 	for i := 0; i <= 3; i++ {
 		for j := 0; j <= 19; j++ {
-			line := fmt.Sprintf(format, j+1, i+2, next_level[(j+(i)*20)]+1, sprite_pos[(j+(i+i+1)*20)], sprite_pos[(j+(i+i)*20)])
+			line := fmt.Sprintf(format, j+1, i+2, next_level[(j+(i)*20)]+1, sprite_pos[(j+(i+i)*20)], sprite_pos[(j+(i+i+1)*20)])
 			output_lines = append(output_lines, line)
 		}
 	}

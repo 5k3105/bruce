@@ -20,7 +20,6 @@ func link_word(path, filename string, start_address uint16) ([]byte, []byte) {
 	for i := 1; i < len(files); i++ {
 		i_ := strconv.Itoa(i)
 		fn := filename + i_
-		println("f>  ", fn)
 		data := load_file(path, fn, false)
 		dataset = append(dataset, data...)
 
