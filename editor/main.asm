@@ -320,6 +320,20 @@ DrawStatus:
     sta DSstore
     iny
     jsr DSwrite
+
+	lda Sp0X
+//sec
+//sbc #$0c
+//lsr
+//lsr
+clc
+adc #$1d
+
+	sta DSstore
+	iny
+	iny
+	jsr DSwrite
+ 
     iny
     iny
     lda #$19                      // 'Y'
@@ -329,9 +343,20 @@ DrawStatus:
     sta DSstore
     jsr DSwrite
 
+	lda Sp0Y
+sec
+sbc #$1d
+and #$07
+clc
+adc #$15
+	sta DSstore
+	iny
+	iny
+	jsr DSwrite
+
     iny
     iny                           // chrset char
-    lda Row1 + 19
+    lda Row1 + 19 
     sta DSstore
     jsr DSwrite
 
@@ -339,7 +364,7 @@ DrawStatus:
     ldy #$00
     lda (VmLo), y
     sta DSstore
-    ldy #$0E
+    ldy #$12 //0E
     jsr DSwrite
 
     //LDY #$22  		//1E - colors

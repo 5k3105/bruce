@@ -1,7 +1,7 @@
     1                                    * = $C000
     2                                
     3                                    .const lantern_records = $C900
-    4                                    .const LevRecAdr = $C700      // A3-B6?
+    4                                    // .const LevRecAdr = $C700      // A3-B6?	NOT USED Level Data @ $C700
     5                                
     6                                    .const zpRowCount = $A3
     7                                    .const zpRecStore1 = $A4      // First Record Storage
@@ -121,7 +121,7 @@
   121 C006: A9 1B                        lda #$1B
   122 C008: 8D 11 D0                     sta RasCmpH
   123                                    //STA IrqSwitch
-  124 C00B: A9 6F                        lda #<RasIrq
+  124 C00B: A9 8E                        lda #<RasIrq
   125 C00D: 8D 14 03                     sta $0314
   126 C010: A9 C3                        lda #>RasIrq
   127 C012: 8D 15 03                     sta $0315
@@ -192,7 +192,7 @@
   192                                    // initialize cursor mode (123)
   193 C070: A9 FF                        lda #$FF
   194 C072: 85 6F                        sta SMode
-  195 C074: 20 63 C2                     jsr Mode
+  195 C074: 20 82 C2                     jsr Mode
   196                                
   197                                    // key auto-repeat
   198 C077: A9 80                        lda #$80
@@ -202,7 +202,7 @@
   202 C07C: A9 05                        lda #$05
   203 C07E: 85 FD                        sta Char
   204 C080: 85 FE                        sta Buff
-  205 C082: 20 9B C4                     jsr ClearScreen
+  205 C082: 20 BA C4                     jsr ClearScreen
   206                                
   207                                color_screen:
   208                                
@@ -226,7 +226,7 @@
   226                                    {
   227 C09A: A9 A0                            lda #$A0
   228 C09C: 99 15 04                         sta Row0 + 21, y
-  229 C09F: B9 5F C3                         lda ColorPallet, y
+  229 C09F: B9 7E C3                         lda ColorPallet, y
   230 C0A2: 38                               sec
   231 C0A3: E9 08                            sbc #$08
   232 C0A5: 99 15 D8                         sta Row0c + 21, y
@@ -237,7 +237,7 @@
   237                                
   238 C0AC: A9 1F                        lda #$1F
   239 C0AE: 85 95                        sta MemPage
-  240 C0B0: 20 7F C4                     jsr ColorMapSetup
+  240 C0B0: 20 9E C4                     jsr ColorMapSetup
   241                                
   242                                    // input
   243                                GETINPUT:
@@ -246,14 +246,14 @@
   246 C0B6: F0 FB                            beq L1
   247                                
   248 C0B8: A2 00                            ldx #$00
-  249 C0BA: DD FC C2                     L2: cmp KeyM, x
+  249 C0BA: DD 1B C3                     L2: cmp KeyM, x
   250 C0BD: F0 13                            beq L3
   251 C0BF: E8                               inx
   252 C0C0: E0 14                            cpx #CmdKeyLen                // length + 1
   253 C0C2: D0 F6                            bne L2
   254                                
   255 C0C4: A2 00                            ldx #$00
-  256 C0C6: DD 61 C3                     L5: cmp ColorKey, x
+  256 C0C6: DD 80 C3                     L5: cmp ColorKey, x
   257 C0C9: F0 27                            beq L6
   258 C0CB: E8                               inx
   259 C0CC: E0 02                            cpx #PalletLen                // length + 1
@@ -263,11 +263,11 @@
   263 C0D2: 8A                           L3: txa
   264 C0D3: 0A                               asl
   265 C0D4: AA                               tax
-  266 C0D5: BD 10 C3                         lda JmpM, x                   // init vector - reusable JvLo/Hi
+  266 C0D5: BD 2F C3                         lda JmpM, x                   // init vector - reusable JvLo/Hi
   267 C0D8: 85 6C                            sta JvLo
   268 C0DA: 48                               pha
   269 C0DB: E8                               inx
-  270 C0DC: BD 10 C3                         lda JmpM, x
+  270 C0DC: BD 2F C3                         lda JmpM, x
   271 C0DF: 85 6D                            sta JvHi
   272 C0E1: 48                               pha
   273 C0E2: A2 00                            ldx #$00
@@ -281,7 +281,7 @@
   281 C0EF: 6C 6C 00                     L4: jmp (JvLo)
   282                                
   283                                        // StoreColor:
-  284 C0F2: BD 5F C3                     L6: lda ColorPallet, x
+  284 C0F2: BD 7E C3                     L6: lda ColorPallet, x
   285 C0F5: 85 8F                            sta Paintcolor
   286 C0F7: A2 28                            ldx #$28
   287                                
@@ -292,8 +292,8 @@
   292 C100: D0 F7                                bne -
   293                                        }
   294                                
-  295 C102: 20 9B C1                         jsr GetV
-  296 C105: 20 E4 C1                         jsr DrCol
+  295 C102: 20 BA C1                         jsr GetV
+  296 C105: 20 03 C2                         jsr DrCol
   297 C108: 18                               clc
   298 C109: A5 6A                            lda VmLo
   299 C10B: 69 28                            adc #$28
@@ -305,7 +305,7 @@
   305                                        }
   306                                
   307 C113: 85 6A                            sta VmLo
-  308 C115: 20 E4 C1                         jsr DrCol
+  308 C115: 20 03 C2                         jsr DrCol
   309                                
   310 C118: 18                               clc
   311 C119: 90 98                            bcc L1
@@ -319,930 +319,962 @@
   319 C122: A5 F7                        lda posx
   320 C124: 85 8E                        sta DSstore
   321 C126: C8                           iny
-  322 C127: 20 66 C1                     jsr DSwrite
-  323 C12A: C8                           iny
-  324 C12B: C8                           iny
-  325 C12C: A9 19                        lda #$19                      // 'Y'
-  326 C12E: 99 00 04                     sta Row0, y
-  327 C131: C8                           iny
-  328 C132: A5 F8                        lda posy
-  329 C134: 85 8E                        sta DSstore
-  330 C136: 20 66 C1                     jsr DSwrite
+  322 C127: 20 85 C1                     jsr DSwrite
+  323                                
+  324 C12A: AD 00 D0                 	lda Sp0X
+  325                                //sec
+  326                                //sbc #$0c
+  327                                //lsr
+  328                                //lsr
+  329 C12D: 18                       clc
+  330 C12E: 69 1D                    adc #$1d
   331                                
-  332 C139: C8                           iny
-  333 C13A: C8                           iny                           // chrset char
-  334 C13B: AD 3B 04                     lda Row1 + 19
-  335 C13E: 85 8E                        sta DSstore
-  336 C140: 20 66 C1                     jsr DSwrite
-  337                                
-  338 C143: 20 9B C1                     jsr GetV                      // char under cursor
-  339 C146: A0 00                        ldy #$00
-  340 C148: B1 6A                        lda (VmLo), y
-  341 C14A: 85 8E                        sta DSstore
-  342 C14C: A0 0E                        ldy #$0E
-  343 C14E: 20 66 C1                     jsr DSwrite
-  344                                
-  345                                    //LDY #$22  		//1E - colors
-  346 C151: A9 A0                        lda #$A0
-  347 C153: 85 8E                        sta DSstore
-  348                                    //LDX #$00
-  349 C155: 20 59 C1                     jsr DSwcolor
-  350 C158: 60                           rts
-  351                                
-  352                                DSwcolor:
-  353                                
-  354 C159: A0 26                        ldy #$26
-  355 C15B: A5 8E                        lda DSstore
-  356 C15D: 99 00 04                     sta Row0, y
-  357 C160: A5 8F                        lda Paintcolor
-  358 C162: 99 00 D8                     sta Row0c, y
-  359 C165: 60                           rts
-  360                                
-  361                                DSwrite:
+  332 C130: 85 8E                    	sta DSstore
+  333 C132: C8                       	iny
+  334 C133: C8                       	iny
+  335 C134: 20 85 C1                 	jsr DSwrite
+  336                                 
+  337 C137: C8                           iny
+  338 C138: C8                           iny
+  339 C139: A9 19                        lda #$19                      // 'Y'
+  340 C13B: 99 00 04                     sta Row0, y
+  341 C13E: C8                           iny
+  342 C13F: A5 F8                        lda posy
+  343 C141: 85 8E                        sta DSstore
+  344 C143: 20 85 C1                     jsr DSwrite
+  345                                
+  346 C146: AD 01 D0                 	lda Sp0Y
+  347 C149: 38                       sec
+  348 C14A: E9 1D                    sbc #$1d
+  349 C14C: 29 07                    and #$07
+  350 C14E: 18                       clc
+  351 C14F: 69 15                    adc #$15
+  352 C151: 85 8E                    	sta DSstore
+  353 C153: C8                       	iny
+  354 C154: C8                       	iny
+  355 C155: 20 85 C1                 	jsr DSwrite
+  356                                
+  357 C158: C8                           iny
+  358 C159: C8                           iny                           // chrset char
+  359 C15A: AD 3B 04                     lda Row1 + 19
+  360 C15D: 85 8E                        sta DSstore
+  361 C15F: 20 85 C1                     jsr DSwrite
   362                                
-  363 C166: A9 24                        lda #$24                      // '$'
-  364 C168: 99 00 04                     sta Row0, y
-  365 C16B: A5 8E                        lda DSstore
-  366 C16D: 29 F0                        and #$F0
-  367 C16F: 18                           clc
-  368 C170: 6A                           ror
-  369 C171: 6A                           ror
-  370 C172: 6A                           ror
-  371 C173: 6A                           ror
-  372 C174: AA                           tax
-  373 C175: BD 38 C3                     lda HexCodes, x
-  374 C178: C8                           iny
-  375 C179: 99 00 04                     sta Row0, y
-  376 C17C: A5 8E                        lda DSstore
-  377 C17E: 29 0F                        and #$0F
-  378 C180: AA                           tax
-  379 C181: BD 38 C3                     lda HexCodes, x
-  380 C184: C8                           iny
-  381 C185: 99 00 04                     sta Row0, y
-  382 C188: 60                           rts
-  383                                
-  384                                    // colors
-  385                                One:
-  386                                
-  387 C189: A6 94                        ldx CurrentColorIndx
-  388 C18B: FE 4B C3                     inc ColorList, x              // $D021
-  389 C18E: 60                           rts
-  390                                Two:
-  391                                
-  392 C18F: A6 94                        ldx CurrentColorIndx
-  393 C191: FE 4C C3                     inc ColorList + 1, x          // $D022
-  394 C194: 60                           rts
-  395                                Three:
-  396                                
-  397 C195: A6 94                        ldx CurrentColorIndx
-  398 C197: FE 4D C3                     inc ColorList + 2, x          // $d023
-  399 C19A: 60                           rts
-  400                                
-  401                                    // fill/space
-  402                                    // get screen vector using table
-  403                                    // input posy,VcTbl,VlTbl,posx
-  404                                GetV:
-  405                                    {
-  406 C19B: A6 F8                            ldx posy                      //row
-  407 C19D: BD E6 C2                         lda VhTbl, x
-  408 C1A0: 85 6B                            sta VmHi                      //video
-  409 C1A2: BD DB C2                         lda VcTbl, x
-  410 C1A5: 85 69                            sta VcHi                      //color
-  411 C1A7: BD F1 C2                         lda VlTbl, x
-  412 C1AA: 18                               clc
-  413 C1AB: 65 F7                            adc posx                      //column
-  414 C1AD: 90 04                            bcc L1
-  415 C1AF: E6 6B                            inc VmHi
-  416 C1B1: E6 69                            inc VcHi
-  417 C1B3: 85 6A                        L1: sta VmLo
-  418 C1B5: 60                               rts                           //returns VmHi,VmLo,VcHi,posyx
-  419                                    }
-  420                                Fill:
+  363 C162: 20 BA C1                     jsr GetV                      // char under cursor
+  364 C165: A0 00                        ldy #$00
+  365 C167: B1 6A                        lda (VmLo), y
+  366 C169: 85 8E                        sta DSstore
+  367 C16B: A0 12                        ldy #$12 //0E
+  368 C16D: 20 85 C1                     jsr DSwrite
+  369                                
+  370                                    //LDY #$22  		//1E - colors
+  371 C170: A9 A0                        lda #$A0
+  372 C172: 85 8E                        sta DSstore
+  373                                    //LDX #$00
+  374 C174: 20 78 C1                     jsr DSwcolor
+  375 C177: 60                           rts
+  376                                
+  377                                DSwcolor:
+  378                                
+  379 C178: A0 26                        ldy #$26
+  380 C17A: A5 8E                        lda DSstore
+  381 C17C: 99 00 04                     sta Row0, y
+  382 C17F: A5 8F                        lda Paintcolor
+  383 C181: 99 00 D8                     sta Row0c, y
+  384 C184: 60                           rts
+  385                                
+  386                                DSwrite:
+  387                                
+  388 C185: A9 24                        lda #$24                      // '$'
+  389 C187: 99 00 04                     sta Row0, y
+  390 C18A: A5 8E                        lda DSstore
+  391 C18C: 29 F0                        and #$F0
+  392 C18E: 18                           clc
+  393 C18F: 6A                           ror
+  394 C190: 6A                           ror
+  395 C191: 6A                           ror
+  396 C192: 6A                           ror
+  397 C193: AA                           tax
+  398 C194: BD 57 C3                     lda HexCodes, x
+  399 C197: C8                           iny
+  400 C198: 99 00 04                     sta Row0, y
+  401 C19B: A5 8E                        lda DSstore
+  402 C19D: 29 0F                        and #$0F
+  403 C19F: AA                           tax
+  404 C1A0: BD 57 C3                     lda HexCodes, x
+  405 C1A3: C8                           iny
+  406 C1A4: 99 00 04                     sta Row0, y
+  407 C1A7: 60                           rts
+  408                                
+  409                                    // colors
+  410                                One:
+  411                                
+  412 C1A8: A6 94                        ldx CurrentColorIndx
+  413 C1AA: FE 6A C3                     inc ColorList, x              // $D021
+  414 C1AD: 60                           rts
+  415                                Two:
+  416                                
+  417 C1AE: A6 94                        ldx CurrentColorIndx
+  418 C1B0: FE 6B C3                     inc ColorList + 1, x          // $D022
+  419 C1B3: 60                           rts
+  420                                Three:
   421                                
-  422 C1B6: AD 3B 04                     lda Row1 + 19                 //selector character
-  423 C1B9: 85 97                        sta ChrBuf
-  424 C1BB: 20 BF C1                     jsr WriteChr
-  425 C1BE: 60                           rts
-  426                                
-  427                                WriteChr:
-  428                                    {
-  429 C1BF: 20 9B C1                         jsr GetV
-  430 C1C2: A5 97                            lda ChrBuf                    // selector character
-  431 C1C4: 20 F6 C1                         jsr DrVid                     // write
-  432                                
-  433 C1C7: A5 6B                            lda VmHi
-  434 C1C9: 48                               pha
-  435 C1CA: 20 E4 C1                         jsr DrCol
-  436                                
-  437 C1CD: 68                               pla
-  438 C1CE: 85 6B                            sta VmHi
-  439 C1D0: A5 6A                            lda VmLo
-  440 C1D2: 69 28                            adc #$28
-  441 C1D4: 90 04                            bcc L3
-  442 C1D6: E6 6B                            inc VmHi
-  443 C1D8: E6 69                            inc VcHi
-  444 C1DA: 85 6A                        L3: sta VmLo
-  445                                
-  446 C1DC: A5 97                            lda ChrBuf
-  447 C1DE: 18                               clc
-  448 C1DF: 69 80                            adc #$80
-  449 C1E1: 20 F6 C1                         jsr DrVid
-  450                                    }
+  422 C1B4: A6 94                        ldx CurrentColorIndx
+  423 C1B6: FE 6C C3                     inc ColorList + 2, x          // $d023
+  424 C1B9: 60                           rts
+  425                                
+  426                                    // fill/space
+  427                                    // get screen vector using table
+  428                                    // input posy,VcTbl,VlTbl,posx
+  429                                GetV:
+  430                                    {
+  431 C1BA: A6 F8                            ldx posy                      //row
+  432 C1BC: BD 05 C3                         lda VhTbl, x
+  433 C1BF: 85 6B                            sta VmHi                      //video
+  434 C1C1: BD FA C2                         lda VcTbl, x
+  435 C1C4: 85 69                            sta VcHi                      //color
+  436 C1C6: BD 10 C3                         lda VlTbl, x
+  437 C1C9: 18                               clc
+  438 C1CA: 65 F7                            adc posx                      //column
+  439 C1CC: 90 04                            bcc L1
+  440 C1CE: E6 6B                            inc VmHi
+  441 C1D0: E6 69                            inc VcHi
+  442 C1D2: 85 6A                        L1: sta VmLo
+  443 C1D4: 60                               rts                           //returns VmHi,VmLo,VcHi,posyx
+  444                                    }
+  445                                Fill:
+  446                                
+  447 C1D5: AD 3B 04                     lda Row1 + 19                 //selector character
+  448 C1D8: 85 97                        sta ChrBuf
+  449 C1DA: 20 DE C1                     jsr WriteChr
+  450 C1DD: 60                           rts
   451                                
-  452                                DrCol:
+  452                                WriteChr:
   453                                    {
-  454 C1E4: A5 69                            lda VcHi
-  455 C1E6: 85 6B                            sta VmHi
-  456 C1E8: A6 6F                            ldx SMode
-  457 C1EA: E8                               inx
-  458 C1EB: A5 8F                            lda Paintcolor
-  459 C1ED: A0 00                            ldy #$00
-  460 C1EF: 91 6A                        L1: sta (VmLo), y
-  461 C1F1: C8                               iny
-  462 C1F2: CA                               dex
-  463 C1F3: D0 FA                            bne L1
-  464 C1F5: 60                               rts
-  465                                    }
-  466                                
-  467                                DrVid:
-  468                                    {
-  469 C1F6: A6 6F                            ldx SMode
-  470 C1F8: E8                               inx
-  471 C1F9: A0 00                            ldy #$00
-  472 C1FB: 18                               clc
-  473 C1FC: 91 6A                        L2: sta (VmLo), y
-  474 C1FE: 69 01                            adc #$01
-  475 C200: C8                               iny
-  476 C201: CA                               dex
-  477 C202: D0 F8                            bne L2
-  478 C204: 60                               rts
-  479                                    }
-  480                                
-  481                                Space:
-  482                                    {
-  483 C205: 20 9B C1                         jsr GetV
-  484 C208: A9 00                            lda #$00
-  485 C20A: 20 19 C2                         jsr DrSp
-  486 C20D: A5 6A                            lda VmLo
-  487 C20F: 69 28                            adc #$28
-  488 C211: 90 02                            bcc L1
-  489 C213: E6 6B                            inc VmHi
-  490 C215: 85 6A                        L1: sta VmLo
-  491 C217: A9 80                            lda #$80
-  492                                    }
-  493                                
-  494                                DrSp:
-  495                                    {
-  496 C219: A6 6F                            ldx SMode
-  497 C21B: E8                               inx
-  498 C21C: A0 00                            ldy #$00
-  499 C21E: 18                               clc
-  500 C21F: 91 6A                        L2: sta (VmLo), y
-  501 C221: C8                               iny
-  502 C222: CA                               dex
-  503 C223: D0 FA                            bne L2
-  504 C225: 60                               rts
-  505                                    }
-  506                                    // plus/minus
-  507                                Plus:
-  508                                    {
-  509 C226: E6 FE                            inc Buff
-  510 C228: 10 04                            bpl L1
-  511 C22A: A9 01                            lda #$01                      // #$06	//#$05
-  512 C22C: 85 FE                            sta Buff
-  513 C22E: A5 FE                        L1: lda Buff
-  514 C230: 85 FD                            sta Char
-  515 C232: 20 4E C2                         jsr Lc1
-  516 C235: 60                               rts
+  454 C1DE: 20 BA C1                         jsr GetV
+  455 C1E1: A5 97                            lda ChrBuf                    // selector character
+  456 C1E3: 20 15 C2                         jsr DrVid                     // write
+  457                                
+  458 C1E6: A5 6B                            lda VmHi
+  459 C1E8: 48                               pha
+  460 C1E9: 20 03 C2                         jsr DrCol
+  461                                
+  462 C1EC: 68                               pla
+  463 C1ED: 85 6B                            sta VmHi
+  464 C1EF: A5 6A                            lda VmLo
+  465 C1F1: 69 28                            adc #$28
+  466 C1F3: 90 04                            bcc L3
+  467 C1F5: E6 6B                            inc VmHi
+  468 C1F7: E6 69                            inc VcHi
+  469 C1F9: 85 6A                        L3: sta VmLo
+  470                                
+  471 C1FB: A5 97                            lda ChrBuf
+  472 C1FD: 18                               clc
+  473 C1FE: 69 80                            adc #$80
+  474 C200: 20 15 C2                         jsr DrVid
+  475                                    }
+  476                                
+  477                                DrCol:
+  478                                    {
+  479 C203: A5 69                            lda VcHi
+  480 C205: 85 6B                            sta VmHi
+  481 C207: A6 6F                            ldx SMode
+  482 C209: E8                               inx
+  483 C20A: A5 8F                            lda Paintcolor
+  484 C20C: A0 00                            ldy #$00
+  485 C20E: 91 6A                        L1: sta (VmLo), y
+  486 C210: C8                               iny
+  487 C211: CA                               dex
+  488 C212: D0 FA                            bne L1
+  489 C214: 60                               rts
+  490                                    }
+  491                                
+  492                                DrVid:
+  493                                    {
+  494 C215: A6 6F                            ldx SMode
+  495 C217: E8                               inx
+  496 C218: A0 00                            ldy #$00
+  497 C21A: 18                               clc
+  498 C21B: 91 6A                        L2: sta (VmLo), y
+  499 C21D: 69 01                            adc #$01
+  500 C21F: C8                               iny
+  501 C220: CA                               dex
+  502 C221: D0 F8                            bne L2
+  503 C223: 60                               rts
+  504                                    }
+  505                                
+  506                                Space:
+  507                                    {
+  508 C224: 20 BA C1                         jsr GetV
+  509 C227: A9 00                            lda #$00
+  510 C229: 20 38 C2                         jsr DrSp
+  511 C22C: A5 6A                            lda VmLo
+  512 C22E: 69 28                            adc #$28
+  513 C230: 90 02                            bcc L1
+  514 C232: E6 6B                            inc VmHi
+  515 C234: 85 6A                        L1: sta VmLo
+  516 C236: A9 80                            lda #$80
   517                                    }
   518                                
-  519                                Minus:
+  519                                DrSp:
   520                                    {
-  521 C236: C6 FE                            dec Buff
-  522 C238: A5 FE                            lda Buff
-  523 C23A: C9 00                            cmp #$00                      // #$05
-  524 C23C: D0 04                            bne L1
-  525 C23E: A9 7F                            lda #$7F
-  526 C240: 85 FE                            sta Buff
-  527 C242: A5 FE                        L1: lda Buff
-  528 C244: 85 FD                            sta Char
-  529 C246: 20 4E C2                         jsr Lc1
-  530 C249: 60                               rts
-  531                                    }
-  532                                pm_end:
-  533                                
-  534 C24A: A9 00                        lda #$00                      // #$05
-  535 C24C: 85 FD                        sta Char
-  536                                
-  537                                Lc1:
-  538                                
-  539 C24E: E6 FD                        inc Char
-  540 C250: A5 FD                        lda Char                      // 06 START
-  541 C252: 30 F6                        bmi pm_end                    // 80
-  542 C254: 9D 28 04                     sta Row1, x
-  543 C257: 18                           clc
-  544 C258: 69 80                        adc #$80
-  545 C25A: 9D 50 04                     sta Row2, x
-  546 C25D: E8                           inx
-  547 C25E: E0 28                        cpx #$28
-  548 C260: D0 EC                        bne Lc1
-  549 C262: 60                           rts
-  550                                
-  551                                    // sprite mode
-  552                                Mode:
-  553                                
-  554 C263: A9 C0                        lda #<Sptbl
-  555 C265: 85 70                        sta SMvLo
-  556 C267: A9 C2                        lda #>Sptbl
-  557 C269: 85 71                        sta SMvHi
+  521 C238: A6 6F                            ldx SMode
+  522 C23A: E8                               inx
+  523 C23B: A0 00                            ldy #$00
+  524 C23D: 18                               clc
+  525 C23E: 91 6A                        L2: sta (VmLo), y
+  526 C240: C8                               iny
+  527 C241: CA                               dex
+  528 C242: D0 FA                            bne L2
+  529 C244: 60                               rts
+  530                                    }
+  531                                    // plus/minus
+  532                                Plus:
+  533                                    {
+  534 C245: E6 FE                            inc Buff
+  535 C247: 10 04                            bpl L1
+  536 C249: A9 01                            lda #$01                      // #$06	//#$05
+  537 C24B: 85 FE                            sta Buff
+  538 C24D: A5 FE                        L1: lda Buff
+  539 C24F: 85 FD                            sta Char
+  540 C251: 20 6D C2                         jsr Lc1
+  541 C254: 60                               rts
+  542                                    }
+  543                                
+  544                                Minus:
+  545                                    {
+  546 C255: C6 FE                            dec Buff
+  547 C257: A5 FE                            lda Buff
+  548 C259: C9 00                            cmp #$00                      // #$05
+  549 C25B: D0 04                            bne L1
+  550 C25D: A9 7F                            lda #$7F
+  551 C25F: 85 FE                            sta Buff
+  552 C261: A5 FE                        L1: lda Buff
+  553 C263: 85 FD                            sta Char
+  554 C265: 20 6D C2                         jsr Lc1
+  555 C268: 60                               rts
+  556                                    }
+  557                                pm_end:
   558                                
-  559 C26B: E6 6F                        inc SMode
-  560 C26D: A6 6F                        ldx SMode
-  561 C26F: E0 03                        cpx #$03
-  562 C271: D0 06                        bne Modetop
-  563 C273: A9 00                        lda #$00
-  564 C275: 85 6F                        sta SMode
-  565 C277: A2 00                        ldx #$00
-  566                                
-  567                                Modetop:
-  568                                
-  569 C279: A5 70                        lda SMvLo
-  570 C27B: 18                           clc
-  571 C27C: 7D BD C2                     adc SMtbl, x
-  572 C27F: 85 70                        sta SMvLo
-  573 C281: 90 02                        bcc SM
-  574 C283: E6 71                        inc SMvHi
+  559 C269: A9 00                        lda #$00                      // #$05
+  560 C26B: 85 FD                        sta Char
+  561                                
+  562                                Lc1:
+  563                                
+  564 C26D: E6 FD                        inc Char
+  565 C26F: A5 FD                        lda Char                      // 06 START
+  566 C271: 30 F6                        bmi pm_end                    // 80
+  567 C273: 9D 28 04                     sta Row1, x
+  568 C276: 18                           clc
+  569 C277: 69 80                        adc #$80
+  570 C279: 9D 50 04                     sta Row2, x
+  571 C27C: E8                           inx
+  572 C27D: E0 28                        cpx #$28
+  573 C27F: D0 EC                        bne Lc1
+  574 C281: 60                           rts
   575                                
-  576                                SM: {
-  577 C285: 78                               sei
-  578 C286: A2 00                            ldx #$00
-  579 C288: BD BA C2                     L1: lda SMcnt, x
-  580 C28B: 48                               pha
-  581 C28C: E8                               inx
-  582 C28D: E0 03                            cpx #$03
-  583 C28F: D0 F7                            bne L1                        // 01,2D,01
-  584 C291: 86 6E                            stx SMst                      // 3 records
-  585                                
-  586 C293: A2 00                            ldx #$00
-  587 C295: 68                           L5: pla
-  588 C296: 85 72                            sta SMct
-  589 C298: A0 00                        L4: ldy #$00
-  590 C29A: B1 70                        L2: lda (SMvLo), y
-  591 C29C: 9D 00 37                         sta SpPtr, x
-  592 C29F: E8                               inx
-  593 C2A0: C8                               iny
-  594 C2A1: C0 03                            cpy #$03                      // 3 bytes
-  595 C2A3: D0 F5                            bne L2
-  596 C2A5: C6 72                            dec SMct
-  597 C2A7: D0 EF                            bne L4
-  598                                
-  599 C2A9: A5 70                            lda SMvLo
-  600 C2AB: 18                               clc
-  601 C2AC: 69 03                            adc #$03                      // increment record
-  602 C2AE: 85 70                            sta SMvLo
-  603 C2B0: 90 02                            bcc L3
-  604 C2B2: E6 71                            inc SMvHi
-  605                                
-  606 C2B4: C6 6E                        L3: dec SMst
-  607 C2B6: D0 DD                            bne L5
-  608 C2B8: 58                               cli
-  609 C2B9: 60                               rts
-  610                                    }
-  611                                
-  612                                    // data
-  613                                SMcnt:
-  614                                
-  615 C2BA: 01 0E 01                     .byte $01, $0E, $01
-  616                                
-  617                                SMtbl:
-  618                                
-  619 C2BD: 00 09 12                     .byte $00, $09, $12
-  620                                
-  621                                Sptbl:
-  622                                
-  623 C2C0: FF 00 00                     .byte $FF, $00, $00
-  624 C2C3: 81 00 00                     .byte $81, $00, $00
-  625 C2C6: FF 00 00                     .byte $FF, $00, $00
-  626                                
-  627 C2C9: FF FF 00                     .byte $FF, $FF, $00
-  628 C2CC: 80 01 00                     .byte $80, $01, $00
-  629 C2CF: FF FF 00                     .byte $FF, $FF, $00
+  576                                    // sprite mode
+  577                                Mode:
+  578                                
+  579 C282: A9 DF                        lda #<Sptbl
+  580 C284: 85 70                        sta SMvLo
+  581 C286: A9 C2                        lda #>Sptbl
+  582 C288: 85 71                        sta SMvHi
+  583                                
+  584 C28A: E6 6F                        inc SMode
+  585 C28C: A6 6F                        ldx SMode
+  586 C28E: E0 03                        cpx #$03
+  587 C290: D0 06                        bne Modetop
+  588 C292: A9 00                        lda #$00
+  589 C294: 85 6F                        sta SMode
+  590 C296: A2 00                        ldx #$00
+  591                                
+  592                                Modetop:
+  593                                
+  594 C298: A5 70                        lda SMvLo
+  595 C29A: 18                           clc
+  596 C29B: 7D DC C2                     adc SMtbl, x
+  597 C29E: 85 70                        sta SMvLo
+  598 C2A0: 90 02                        bcc SM
+  599 C2A2: E6 71                        inc SMvHi
+  600                                
+  601                                SM: {
+  602 C2A4: 78                               sei
+  603 C2A5: A2 00                            ldx #$00
+  604 C2A7: BD D9 C2                     L1: lda SMcnt, x
+  605 C2AA: 48                               pha
+  606 C2AB: E8                               inx
+  607 C2AC: E0 03                            cpx #$03
+  608 C2AE: D0 F7                            bne L1                        // 01,2D,01
+  609 C2B0: 86 6E                            stx SMst                      // 3 records
+  610                                
+  611 C2B2: A2 00                            ldx #$00
+  612 C2B4: 68                           L5: pla
+  613 C2B5: 85 72                            sta SMct
+  614 C2B7: A0 00                        L4: ldy #$00
+  615 C2B9: B1 70                        L2: lda (SMvLo), y
+  616 C2BB: 9D 00 37                         sta SpPtr, x
+  617 C2BE: E8                               inx
+  618 C2BF: C8                               iny
+  619 C2C0: C0 03                            cpy #$03                      // 3 bytes
+  620 C2C2: D0 F5                            bne L2
+  621 C2C4: C6 72                            dec SMct
+  622 C2C6: D0 EF                            bne L4
+  623                                
+  624 C2C8: A5 70                            lda SMvLo
+  625 C2CA: 18                               clc
+  626 C2CB: 69 03                            adc #$03                      // increment record
+  627 C2CD: 85 70                            sta SMvLo
+  628 C2CF: 90 02                            bcc L3
+  629 C2D1: E6 71                            inc SMvHi
   630                                
-  631 C2D2: FF FF FF                     .byte $FF, $FF, $FF
-  632 C2D5: 80 00 01                     .byte $80, $00, $01
-  633 C2D8: FF FF FF                     .byte $FF, $FF, $FF
-  634                                
-  635                                VcTbl:
+  631 C2D3: C6 6E                        L3: dec SMst
+  632 C2D5: D0 DD                            bne L5
+  633 C2D7: 58                               cli
+  634 C2D8: 60                               rts
+  635                                    }
   636                                
-  637 C2DB: D8 D8                        .byte $D8, $D8
-  638 C2DD: D9 D9 D9                     .byte $D9, $D9, $D9
-  639 C2E0: DA DA DA DA                  .byte $DA, $DA, $DA, $DA
-  640 C2E4: DB DB                        .byte $DB, $DB
+  637                                    // data
+  638                                SMcnt:
+  639                                
+  640 C2D9: 01 0E 01                     .byte $01, $0E, $01
   641                                
-  642                                VhTbl:
+  642                                SMtbl:
   643                                
-  644 C2E6: 04 04                        .byte $04, $04
-  645 C2E8: 05 05 05                     .byte $05, $05, $05
-  646 C2EB: 06 06 06 06                  .byte $06, $06, $06, $06
-  647 C2EF: 07 07                        .byte $07, $07
-  648                                
-  649                                VlTbl:
-  650                                
-  651 C2F1: 78 C8                        .byte $78, $C8
-  652 C2F3: 18 68 B8                     .byte $18, $68, $B8
-  653 C2F6: 08 58 A8 F8                  .byte $08, $58, $A8, $F8
-  654 C2FA: 48 98                        .byte $48, $98
+  644 C2DC: 00 09 12                     .byte $00, $09, $12
+  645                                
+  646                                Sptbl:
+  647                                
+  648 C2DF: FF 00 00                     .byte $FF, $00, $00
+  649 C2E2: 81 00 00                     .byte $81, $00, $00
+  650 C2E5: FF 00 00                     .byte $FF, $00, $00
+  651                                
+  652 C2E8: FF FF 00                     .byte $FF, $FF, $00
+  653 C2EB: 80 01 00                     .byte $80, $01, $00
+  654 C2EE: FF FF 00                     .byte $FF, $FF, $00
   655                                
-  656                                    //CmdKeyLen	= $14 - Create Lant Recs key now unnecessary (F7)
-  657                                KeyM:
-  658                                    //    +	   -    up   dn   lf   rt   sp   z    1    2    3    `    F1   F5
-  659 C2FC: 2D 2B 91 11 9D 1D 58 5A      .byte $2D, $2B, $91, $11, $9D, $1D, $58, $5A, $31, $32, $33, $5F, $85, $87
-  659 C304: 31 32 33 5F 85 87
-  660                                    //    c    v    0    9    F7   F8
-  661 C30A: 43 56 30 39 88 8C            .byte $43, $56, $30, $39, $88, $8C
-  662                                
-  663                                JmpM:
-  664                                
-  665 C310: 26 C2 36 C2 FE C3 0B C4      .word Plus, Minus, up, dn, lf, rt, Space, Fill, One, Two, Three, Mode, ColorMap, ClearScreen
-  665 C318: E2 C3 EF C3 05 C2 B6 C1
-  665 C320: 89 C1 8F C1 95 C1 63 C2
-  665 C328: 6F C4 9B C4
-  666 C32C: CC C4 D6 C4 DD C4 EA C4      .word Copy, Paste, MoveToChr, ShowDoors, create_lantern_records, Compress
-  666 C334: 09 C5 79 C5
-  667                                
-  668                                HexCodes:
-  669                                
-  670 C338: 30 31 32 33 34 35 36 37      .byte $30, $31, $32, $33, $34, $35, $36, $37, $38, $39
-  670 C340: 38 39
-  671 C342: 01 02 03 04 05 06            .byte $01, $02, $03, $04, $05, $06
-  672                                
-  673                                RowRas:
-  674                                
-  675 C348: 02 04 0A                     .byte $02, $04, $0A
-  676                                
-  677                                ColorList:
-  678                                
-  679 C34B: FB F1 FE FB F1 FE FB F2      .byte $FB, $F1, $FE, $FB, $F1, $FE, $FB, $F2, $F1, $FC, $F2, $F1// 4x 3(# rasters)
-  679 C353: F1 FC F2 F1
+  656 C2F1: FF FF FF                     .byte $FF, $FF, $FF
+  657 C2F4: 80 00 01                     .byte $80, $00, $01
+  658 C2F7: FF FF FF                     .byte $FF, $FF, $FF
+  659                                
+  660                                VcTbl:
+  661                                
+  662 C2FA: D8 D8                        .byte $D8, $D8
+  663 C2FC: D9 D9 D9                     .byte $D9, $D9, $D9
+  664 C2FF: DA DA DA DA                  .byte $DA, $DA, $DA, $DA
+  665 C303: DB DB                        .byte $DB, $DB
+  666                                
+  667                                VhTbl:
+  668                                
+  669 C305: 04 04                        .byte $04, $04
+  670 C307: 05 05 05                     .byte $05, $05, $05
+  671 C30A: 06 06 06 06                  .byte $06, $06, $06, $06
+  672 C30E: 07 07                        .byte $07, $07
+  673                                
+  674                                VlTbl:
+  675                                
+  676 C310: 78 C8                        .byte $78, $C8
+  677 C312: 18 68 B8                     .byte $18, $68, $B8
+  678 C315: 08 58 A8 F8                  .byte $08, $58, $A8, $F8
+  679 C319: 48 98                        .byte $48, $98
   680                                
-  681                                RasLine:
-  682                                
-  683 C357: 3A 49 78 97 FD 78 97 FD      .byte $3A, $49, $78, $97, $FD, $78, $97, $FD
-  684                                
-  685                                    // PalletLen 	= $02
-  686                                ColorPallet:
+  681                                    //CmdKeyLen	= $14 - Create Lant Recs key now unnecessary (F7)
+  682                                KeyM:
+  683                                    //    +	   -    up   dn   lf   rt   sp   z    1    2    3    `    F1   F5
+  684 C31B: 2D 2B 91 11 9D 1D 58 5A      .byte $2D, $2B, $91, $11, $9D, $1D, $58, $5A, $31, $32, $33, $5F, $85, $87
+  684 C323: 31 32 33 5F 85 87
+  685                                    //    c    v    0    9    F7   F8
+  686 C329: 43 56 30 39 88 8C            .byte $43, $56, $30, $39, $88, $8C
   687                                
-  688 C35F: 08 0E                        .byte $08, $0E                // black=block, blue=climb
+  688                                JmpM:
   689                                
-  690                                    //ColorKeyLen = PalletLen
-  691                                ColorKey:
-  692                                    //     A   S   D   F   G   H   J   K
-  693 C361: 41 53 44 46 47 48 4A 4B      .byte $41, $53, $44, $46, $47, $48, $4A, $4B
+  690 C32F: 45 C2 55 C2 1D C4 2A C4      .word Plus, Minus, up, dn, lf, rt, Space, Fill, One, Two, Three, Mode, ColorMap, ClearScreen
+  690 C337: 01 C4 0E C4 24 C2 D5 C1
+  690 C33F: A8 C1 AE C1 B4 C1 82 C2
+  690 C347: 8E C4 BA C4
+  691 C34B: EB C4 F5 C4 FC C4 09 C5      .word Copy, Paste, MoveToChr, ShowDoors, create_lantern_records, Compress
+  691 C353: 28 C5 98 C5
+  692                                
+  693                                HexCodes:
   694                                
-  695                                lantern_lookup_table:
-  696                                
-  697 C369: 13 14 31 9E 9F 92            .byte $13, $14, $31, $9E, $9F, $92
-  698                                
-  699                                    // IRQ
-  700                                RasIrq:
-  701                                    {
-  702 C36F: A9 01                            lda #$01
-  703 C371: 8D 1A D0                         sta $D01A                     // raster cmp
-  704 C374: 8D 19 D0                         sta $D019                     // raster ack
+  695 C357: 30 31 32 33 34 35 36 37      .byte $30, $31, $32, $33, $34, $35, $36, $37, $38, $39
+  695 C35F: 38 39
+  696 C361: 01 02 03 04 05 06            .byte $01, $02, $03, $04, $05, $06
+  697                                
+  698                                RowRas:
+  699                                
+  700 C367: 02 04 0A                     .byte $02, $04, $0A
+  701                                
+  702                                ColorList:
+  703                                
+  704 C36A: FB F1 FE FB F1 FE FB F2      .byte $FB, $F1, $FE, $FB, $F1, $FE, $FB, $F2, $F1, $FC, $F2, $F1// 4x 3(# rasters)
+  704 C372: F1 FC F2 F1
   705                                
-  706 C377: AD 12 D0                         lda $D012
-  707 C37A: C9 FD                            cmp #$FD
-  708 C37C: D0 17                            bne L1
+  706                                RasLine:
+  707                                
+  708 C376: 3A 49 78 97 FD 78 97 FD      .byte $3A, $49, $78, $97, $FD, $78, $97, $FD
   709                                
-  710 C37E: 20 87 EA                         jsr $EA87                     // read keyboard
-  711                                
-  712 C381: AD 16 D0                         lda $D016
-  713 C384: 29 EF                            and #%11101111
-  714 C386: 8D 16 D0                         sta $D016                     //multi-color off
-  715                                
-  716 C389: A9 15                            lda #$15                      // regular chrset
-  717 C38B: 8D 18 D0                         sta $D018
-  718 C38E: A9 FC                            lda #$FC                      // med grey
-  719 C390: 8D 21 D0                         sta $D021                     // status line
-  720 C393: D0 32                            bne L9
+  710                                    // PalletLen 	= $02
+  711                                ColorPallet:
+  712                                
+  713 C37E: 08 0E                        .byte $08, $0E                // black=block, blue=climb
+  714                                
+  715                                    //ColorKeyLen = PalletLen
+  716                                ColorKey:
+  717                                    //     A   S   D   F   G   H   J   K
+  718 C380: 41 53 44 46 47 48 4A 4B      .byte $41, $53, $44, $46, $47, $48, $4A, $4B
+  719                                
+  720                                lantern_lookup_table:
   721                                
-  722                                        //L1	TAX : INX : INX : TXA : INX
-  723                                        //L10	CPX $D012
-  724                                        //		BEQ L12
-  725                                        //		CMP $D012
-  726                                        //		BNE L10
-  727                                        //		LDX #$0A
-  728                                        //L11	DEX
-  729                                        //		BNE L11
-  730                                        //	LDA RasLineIndx
-  731                                        //	BNE .L5
-  732 C395: A5 93                        L1: lda RasLineIndx
-  733 C397: D0 11                            bne L5
+  722 C388: 13 14 31 9E 9F 92            .byte $13, $14, $31, $9E, $9F, $92
+  723                                
+  724                                    // IRQ
+  725                                RasIrq:
+  726                                    {
+  727 C38E: A9 01                            lda #$01
+  728 C390: 8D 1A D0                         sta $D01A                     // raster cmp
+  729 C393: 8D 19 D0                         sta $D019                     // raster ack
+  730                                
+  731 C396: AD 12 D0                         lda $D012
+  732 C399: C9 FD                            cmp #$FD
+  733 C39B: D0 17                            bne L1
   734                                
-  735 C399: A5 95                            lda MemPage                   // txt pg & chrset
-  736 C39B: 8D 18 D0                         sta $D018
-  737                                
-  738 C39E: AD 16 D0                         lda $D016
-  739 C3A1: 09 10                            ora #%10000
-  740 C3A3: 8D 16 D0                         sta $D016                     //multi-color on
-  741                                
-  742 C3A6: A6 94                            ldx CurrentColorIndx
-  743 C3A8: D0 02                            bne L7
-  744                                
-  745 C3AA: A6 92                        L5: ldx ColorListIndx
-  746 C3AC: BD 4B C3                     L7: lda ColorList, x
-  747 C3AF: 8D 21 D0                         sta $D021
-  748 C3B2: BD 4C C3                         lda ColorList + 1, x
-  749 C3B5: 8D 22 D0                         sta $D022
-  750 C3B8: BD 4D C3                         lda ColorList + 2, x
-  751 C3BB: 8D 23 D0                         sta $D023
-  752                                
-  753 C3BE: A5 92                            lda ColorListIndx             // next color record
-  754 C3C0: 18                               clc
-  755 C3C1: 69 03                            adc #$03
-  756 C3C3: 85 92                            sta ColorListIndx
-  757                                
-  758 C3C5: E6 93                            inc RasLineIndx               // next raster record
-  759 C3C7: A6 93                        L9: ldx RasLineIndx
-  760 C3C9: BD 57 C3                         lda RasLine, x
-  761                                
-  762 C3CC: 8D 12 D0                     L2: sta $D012
-  763 C3CF: C9 FD                            cmp #$FD                      // end of screen
-  764 C3D1: F0 06                            beq L3
-  765                                
-  766 C3D3: 68                           L4: pla
-  767 C3D4: A8                               tay
-  768 C3D5: 68                               pla
-  769 C3D6: AA                               tax
-  770 C3D7: 68                               pla
-  771 C3D8: 40                               rti
-  772                                
-  773 C3D9: A9 00                        L3: lda #$00
-  774 C3DB: 85 93                            sta RasLineIndx
-  775 C3DD: 85 92                            sta ColorListIndx
-  776 C3DF: 4C D3 C3                         jmp L4
-  777                                    }
-  778                                
-  779                                    // direction (l/r/u/d)
-  780                                direction_move:
-  781                                
-  782                                lf: {
-  783 C3E2: A6 F7                            ldx posx
-  784 C3E4: CA                               dex
-  785 C3E5: 10 02                            bpl L1                        // >#$80?
-  786 C3E7: A2 27                            ldx #$27
-  787 C3E9: 86 F7                        L1: stx posx
-  788 C3EB: 20 1A C4                         jsr sprposinitx
-  789 C3EE: 60                               rts
-  790                                    }
-  791                                
-  792                                rt: {
-  793 C3EF: A6 F7                            ldx posx
-  794 C3F1: E8                               inx
-  795 C3F2: E4 FB                            cpx Xbound
-  796 C3F4: 90 02                            bcc L2                        // <#$28?
-  797 C3F6: A2 00                            ldx #$00
-  798 C3F8: 86 F7                        L2: stx posx
-  799 C3FA: 20 1A C4                         jsr sprposinitx
-  800 C3FD: 60                               rts
-  801                                    }
-  802                                
-  803                                up: {
-  804 C3FE: A6 F8                            ldx posy
-  805 C400: CA                               dex
-  806 C401: 10 02                            bpl L3
-  807 C403: A2 0A                            ldx #$0A
-  808 C405: 86 F8                        L3: stx posy
-  809 C407: 20 39 C4                         jsr sprposinity
-  810 C40A: 60                               rts
-  811                                    }
-  812                                
-  813                                dn: {
-  814 C40B: A6 F8                            ldx posy
-  815 C40D: E8                               inx
-  816 C40E: E4 FC                            cpx Ybound
-  817 C410: 90 02                            bcc L4
-  818 C412: A2 00                            ldx #$00
-  819 C414: 86 F8                        L4: stx posy
-  820 C416: 20 39 C4                         jsr sprposinity
-  821 C419: 60                               rts
-  822                                    }
-  823                                
-  824                                sprposinitx:
-  825                                    {
-  826 C41A: A0 00                            ldy #$00
-  827 C41C: 8C 10 D0                         sty SpMSB
-  828 C41F: 8A                               txa
-  829 C420: 0A                               asl
-  830 C421: 0A                               asl
-  831 C422: 0A                               asl
-  832 C423: 90 09                            bcc L5
-  833 C425: EE 10 D0                         inc SpMSB
-  834 C428: 69 17                            adc #$17
-  835 C42A: 8D 00 D0                         sta Sp0X
-  836 C42D: 60                               rts
-  837 C42E: 65 90                        L5: adc sprstx
-  838 C430: 90 03                            bcc L6
-  839 C432: EE 10 D0                         inc SpMSB
-  840 C435: 8D 00 D0                     L6: sta Sp0X
-  841 C438: 60                               rts
-  842                                    }
-  843                                
-  844                                sprposinity:
-  845                                
-  846 C439: 8A                           txa
-  847 C43A: 0A                           asl
-  848 C43B: 0A                           asl
-  849 C43C: 0A                           asl
-  850 C43D: 0A                           asl
-  851 C43E: 65 91                        adc sprsty
-  852 C440: 8D 01 D0                     sta Sp0Y
-  853 C443: 20 47 C4                     jsr ChrColorBar
-  854 C446: 60                           rts
-  855                                
-  856                                ChrColorBar:
-  857                                    {
-  858 C447: A0 FF                            ldy #$FF
-  859 C449: A2 00                            ldx #$00
-  860 C44B: E8                           L1: inx
-  861 C44C: E8                               inx
-  862 C44D: E8                               inx                           //set chrset bar colors
-  863 C44E: C8                               iny
-  864 C44F: B9 48 C3                         lda RowRas, y
-  865 C452: C5 F8                            cmp posy
-  866 C454: 90 F5                            bcc L1
-  867 C456: 86 94                            stx CurrentColorIndx
+  735 C39D: 20 87 EA                         jsr $EA87                     // read keyboard
+  736                                
+  737 C3A0: AD 16 D0                         lda $D016
+  738 C3A3: 29 EF                            and #%11101111
+  739 C3A5: 8D 16 D0                         sta $D016                     //multi-color off
+  740                                
+  741 C3A8: A9 15                            lda #$15                      // regular chrset
+  742 C3AA: 8D 18 D0                         sta $D018
+  743 C3AD: A9 FC                            lda #$FC                      // med grey
+  744 C3AF: 8D 21 D0                         sta $D021                     // status line
+  745 C3B2: D0 32                            bne L9
+  746                                
+  747                                        //L1	TAX : INX : INX : TXA : INX
+  748                                        //L10	CPX $D012
+  749                                        //		BEQ L12
+  750                                        //		CMP $D012
+  751                                        //		BNE L10
+  752                                        //		LDX #$0A
+  753                                        //L11	DEX
+  754                                        //		BNE L11
+  755                                        //	LDA RasLineIndx
+  756                                        //	BNE .L5
+  757 C3B4: A5 93                        L1: lda RasLineIndx
+  758 C3B6: D0 11                            bne L5
+  759                                
+  760 C3B8: A5 95                            lda MemPage                   // txt pg & chrset
+  761 C3BA: 8D 18 D0                         sta $D018
+  762                                
+  763 C3BD: AD 16 D0                         lda $D016
+  764 C3C0: 09 10                            ora #%10000
+  765 C3C2: 8D 16 D0                         sta $D016                     //multi-color on
+  766                                
+  767 C3C5: A6 94                            ldx CurrentColorIndx
+  768 C3C7: D0 02                            bne L7
+  769                                
+  770 C3C9: A6 92                        L5: ldx ColorListIndx
+  771 C3CB: BD 6A C3                     L7: lda ColorList, x
+  772 C3CE: 8D 21 D0                         sta $D021
+  773 C3D1: BD 6B C3                         lda ColorList + 1, x
+  774 C3D4: 8D 22 D0                         sta $D022
+  775 C3D7: BD 6C C3                         lda ColorList + 2, x
+  776 C3DA: 8D 23 D0                         sta $D023
+  777                                
+  778 C3DD: A5 92                            lda ColorListIndx             // next color record
+  779 C3DF: 18                               clc
+  780 C3E0: 69 03                            adc #$03
+  781 C3E2: 85 92                            sta ColorListIndx
+  782                                
+  783 C3E4: E6 93                            inc RasLineIndx               // next raster record
+  784 C3E6: A6 93                        L9: ldx RasLineIndx
+  785 C3E8: BD 76 C3                         lda RasLine, x
+  786                                
+  787 C3EB: 8D 12 D0                     L2: sta $D012
+  788 C3EE: C9 FD                            cmp #$FD                      // end of screen
+  789 C3F0: F0 06                            beq L3
+  790                                
+  791 C3F2: 68                           L4: pla
+  792 C3F3: A8                               tay
+  793 C3F4: 68                               pla
+  794 C3F5: AA                               tax
+  795 C3F6: 68                               pla
+  796 C3F7: 40                               rti
+  797                                
+  798 C3F8: A9 00                        L3: lda #$00
+  799 C3FA: 85 93                            sta RasLineIndx
+  800 C3FC: 85 92                            sta ColorListIndx
+  801 C3FE: 4C F2 C3                         jmp L4
+  802                                    }
+  803                                
+  804                                    // direction (l/r/u/d)
+  805                                direction_move:
+  806                                
+  807                                lf: {
+  808 C401: A6 F7                            ldx posx
+  809 C403: CA                               dex
+  810 C404: 10 02                            bpl L1                        // >#$80?
+  811 C406: A2 27                            ldx #$27
+  812 C408: 86 F7                        L1: stx posx
+  813 C40A: 20 39 C4                         jsr sprposinitx
+  814 C40D: 60                               rts
+  815                                    }
+  816                                
+  817                                rt: {
+  818 C40E: A6 F7                            ldx posx
+  819 C410: E8                               inx
+  820 C411: E4 FB                            cpx Xbound
+  821 C413: 90 02                            bcc L2                        // <#$28?
+  822 C415: A2 00                            ldx #$00
+  823 C417: 86 F7                        L2: stx posx
+  824 C419: 20 39 C4                         jsr sprposinitx
+  825 C41C: 60                               rts
+  826                                    }
+  827                                
+  828                                up: {
+  829 C41D: A6 F8                            ldx posy
+  830 C41F: CA                               dex
+  831 C420: 10 02                            bpl L3
+  832 C422: A2 0A                            ldx #$0A
+  833 C424: 86 F8                        L3: stx posy
+  834 C426: 20 58 C4                         jsr sprposinity
+  835 C429: 60                               rts
+  836                                    }
+  837                                
+  838                                dn: {
+  839 C42A: A6 F8                            ldx posy
+  840 C42C: E8                               inx
+  841 C42D: E4 FC                            cpx Ybound
+  842 C42F: 90 02                            bcc L4
+  843 C431: A2 00                            ldx #$00
+  844 C433: 86 F8                        L4: stx posy
+  845 C435: 20 58 C4                         jsr sprposinity
+  846 C438: 60                               rts
+  847                                    }
+  848                                
+  849                                sprposinitx:
+  850                                    {
+  851 C439: A0 00                            ldy #$00
+  852 C43B: 8C 10 D0                         sty SpMSB
+  853 C43E: 8A                               txa
+  854 C43F: 0A                               asl
+  855 C440: 0A                               asl
+  856 C441: 0A                               asl
+  857 C442: 90 09                            bcc L5
+  858 C444: EE 10 D0                         inc SpMSB
+  859 C447: 69 17                            adc #$17
+  860 C449: 8D 00 D0                         sta Sp0X
+  861 C44C: 60                               rts
+  862 C44D: 65 90                        L5: adc sprstx
+  863 C44F: 90 03                            bcc L6
+  864 C451: EE 10 D0                         inc SpMSB
+  865 C454: 8D 00 D0                     L6: sta Sp0X
+  866 C457: 60                               rts
+  867                                    }
   868                                
-  869 C458: A0 00                            ldy #$00                      //save to chrset color bar buffer
-  870 C45A: A9 A0                        L2: lda #$A0                      //& update status
-  871 C45C: 99 22 04                         sta Row0 + 34, y
-  872 C45F: BD 4B C3                         lda ColorList, x
-  873 C462: 99 4B C3                         sta ColorList, y
-  874 C465: 99 22 D8                         sta Row0c + 34, y
-  875 C468: E8                               inx
-  876 C469: C8                               iny
-  877 C46A: C0 03                            cpy #$03
-  878 C46C: D0 EC                            bne L2
-  879                                
-  880 C46E: 60                               rts
-  881                                    }
-  882                                
-  883                                    // F1
-  884                                ColorMap:
-  885                                    {
-  886 C46F: A5 95                            lda MemPage
-  887 C471: C9 1F                            cmp #$1F
-  888 C473: F0 05                            beq L1
-  889 C475: A9 1F                            lda #$1F
-  890 C477: 85 95                            sta MemPage
-  891 C479: 60                               rts
-  892 C47A: A9 2F                        L1: lda #$2F
-  893 C47C: 85 95                            sta MemPage
-  894 C47E: 60                               rts
-  895                                    }
-  896                                
-  897                                    // Set up Color Map Page
-  898                                ColorMapSetup:
-  899                                    {
-  900 C47F: A2 11                            ldx #$11
-  901                                
-  902 C481: BD E6 C2                     L2: lda VhTbl, x
-  903 C484: 69 04                            adc #$04
-  904 C486: 85 6B                            sta VmHi
-  905 C488: BD F1 C2                         lda VlTbl, x
-  906 C48B: 85 6A                            sta VmLo
+  869                                sprposinity:
+  870                                
+  871 C458: 8A                           txa
+  872 C459: 0A                           asl
+  873 C45A: 0A                           asl
+  874 C45B: 0A                           asl
+  875 C45C: 0A                           asl
+  876 C45D: 65 91                        adc sprsty
+  877 C45F: 8D 01 D0                     sta Sp0Y
+  878 C462: 20 66 C4                     jsr ChrColorBar
+  879 C465: 60                           rts
+  880                                
+  881                                ChrColorBar:
+  882                                    {
+  883 C466: A0 FF                            ldy #$FF
+  884 C468: A2 00                            ldx #$00
+  885 C46A: E8                           L1: inx
+  886 C46B: E8                               inx
+  887 C46C: E8                               inx                           //set chrset bar colors
+  888 C46D: C8                               iny
+  889 C46E: B9 67 C3                         lda RowRas, y
+  890 C471: C5 F8                            cmp posy
+  891 C473: 90 F5                            bcc L1
+  892 C475: 86 94                            stx CurrentColorIndx
+  893                                
+  894 C477: A0 00                            ldy #$00                      //save to chrset color bar buffer
+  895 C479: A9 A0                        L2: lda #$A0                      //& update status
+  896 C47B: 99 22 04                         sta Row0 + 34, y
+  897 C47E: BD 6A C3                         lda ColorList, x
+  898 C481: 99 6A C3                         sta ColorList, y
+  899 C484: 99 22 D8                         sta Row0c + 34, y
+  900 C487: E8                               inx
+  901 C488: C8                               iny
+  902 C489: C0 03                            cpy #$03
+  903 C48B: D0 EC                            bne L2
+  904                                
+  905 C48D: 60                               rts
+  906                                    }
   907                                
-  908 C48D: A0 51                            ldy #$51                      // 81
-  909                                
-  910 C48F: 88                           L1: dey
-  911 C490: A9 06                            lda #$06
-  912 C492: 91 6A                            sta (VmLo), y
-  913 C494: 98                               tya
-  914 C495: D0 F8                            bne L1
-  915                                
-  916 C497: CA                               dex
-  917 C498: 10 E7                            bpl L2
-  918 C49A: 60                               rts
-  919                                    }
-  920                                
-  921                                    // F5
-  922                                ClearScreen:
-  923                                    {
-  924 C49B: A2 0A                            ldx #$0A
-  925 C49D: BD E6 C2                     L2: lda VhTbl, x
-  926 C4A0: 85 6B                            sta VmHi
-  927 C4A2: BD F1 C2                         lda VlTbl, x
-  928 C4A5: 85 6A                            sta VmLo
-  929                                
-  930 C4A7: A0 51                            ldy #$51                      // 81
-  931 C4A9: A9 00                            lda #$00
-  932 C4AB: 88                           L1: dey
-  933 C4AC: 91 6A                            sta (VmLo), y
-  934 C4AE: D0 FB                            bne L1
-  935 C4B0: CA                               dex
-  936 C4B1: 10 EA                            bpl L2
-  937                                
-  938 C4B3: A2 0A                            ldx #$0A
-  939 C4B5: BD DB C2                     L3: lda VcTbl, x
-  940 C4B8: 85 6B                            sta VmHi
-  941 C4BA: BD F1 C2                         lda VlTbl, x
-  942 C4BD: 85 6A                            sta VmLo
-  943                                
-  944 C4BF: A0 51                            ldy #$51                      // 81
-  945 C4C1: A9 0E                            lda #$0E
-  946 C4C3: 88                           L4: dey
-  947 C4C4: 91 6A                            sta (VmLo), y
-  948 C4C6: D0 FB                            bne L4
-  949 C4C8: CA                               dex
-  950 C4C9: 10 EA                            bpl L3
-  951 C4CB: 60                               rts
-  952                                    }
-  953                                
-  954                                    // Copy/Paste (C/V)
-  955                                Copy:
-  956                                
-  957 C4CC: 20 9B C1                     jsr GetV                      //char under cursor
-  958 C4CF: A0 00                        ldy #$00
-  959 C4D1: B1 6A                        lda (VmLo), y
-  960 C4D3: 85 96                        sta CopyBuf
-  961 C4D5: 60                           rts
+  908                                    // F1
+  909                                ColorMap:
+  910                                    {
+  911 C48E: A5 95                            lda MemPage
+  912 C490: C9 1F                            cmp #$1F
+  913 C492: F0 05                            beq L1
+  914 C494: A9 1F                            lda #$1F
+  915 C496: 85 95                            sta MemPage
+  916 C498: 60                               rts
+  917 C499: A9 2F                        L1: lda #$2F
+  918 C49B: 85 95                            sta MemPage
+  919 C49D: 60                               rts
+  920                                    }
+  921                                
+  922                                    // Set up Color Map Page
+  923                                ColorMapSetup:
+  924                                    {
+  925 C49E: A2 11                            ldx #$11
+  926                                
+  927 C4A0: BD 05 C3                     L2: lda VhTbl, x
+  928 C4A3: 69 04                            adc #$04
+  929 C4A5: 85 6B                            sta VmHi
+  930 C4A7: BD 10 C3                         lda VlTbl, x
+  931 C4AA: 85 6A                            sta VmLo
+  932                                
+  933 C4AC: A0 51                            ldy #$51                      // 81
+  934                                
+  935 C4AE: 88                           L1: dey
+  936 C4AF: A9 06                            lda #$06
+  937 C4B1: 91 6A                            sta (VmLo), y
+  938 C4B3: 98                               tya
+  939 C4B4: D0 F8                            bne L1
+  940                                
+  941 C4B6: CA                               dex
+  942 C4B7: 10 E7                            bpl L2
+  943 C4B9: 60                               rts
+  944                                    }
+  945                                
+  946                                    // F5
+  947                                ClearScreen:
+  948                                    {
+  949 C4BA: A2 0A                            ldx #$0A
+  950 C4BC: BD 05 C3                     L2: lda VhTbl, x
+  951 C4BF: 85 6B                            sta VmHi
+  952 C4C1: BD 10 C3                         lda VlTbl, x
+  953 C4C4: 85 6A                            sta VmLo
+  954                                
+  955 C4C6: A0 51                            ldy #$51                      // 81
+  956 C4C8: A9 00                            lda #$00
+  957 C4CA: 88                           L1: dey
+  958 C4CB: 91 6A                            sta (VmLo), y
+  959 C4CD: D0 FB                            bne L1
+  960 C4CF: CA                               dex
+  961 C4D0: 10 EA                            bpl L2
   962                                
-  963                                Paste:
-  964                                
-  965 C4D6: A5 96                        lda CopyBuf
-  966 C4D8: 85 97                        sta ChrBuf
-  967 C4DA: 4C BF C1                     jmp WriteChr
+  963 C4D2: A2 0A                            ldx #$0A
+  964 C4D4: BD FA C2                     L3: lda VcTbl, x
+  965 C4D7: 85 6B                            sta VmHi
+  966 C4D9: BD 10 C3                         lda VlTbl, x
+  967 C4DC: 85 6A                            sta VmLo
   968                                
-  969                                    // 0
-  970                                MoveToChr:
-  971                                
-  972 C4DD: 20 9B C1                     jsr GetV                      //char under cursor
-  973 C4E0: A0 00                        ldy #$00
-  974 C4E2: B1 6A                        lda (VmLo), y
-  975                                    //		CLC
-  976                                    //		SBC #$10
-  977                                    //		STA Buff
-  978                                    //		INC Buff
-  979 C4E4: 85 FD                        sta Char
-  980 C4E6: 20 4E C2                     jsr Lc1
-  981                                    //		JSR Minus
-  982 C4E9: 60                           rts
-  983                                
-  984                                    // Import Charcters 1-5
-  985                                    // 9
-  986                                ShowDoors:
-  987                                    {
-  988 C4EA: 78                               sei
-  989 C4EB: A5 01                            lda $01
-  990 C4ED: 29 FB                            and #$FB
-  991 C4EF: 85 01                            sta $01
-  992                                
-  993 C4F1: A2 FF                            ldx #$FF
-  994 C4F3: E8                           L1: inx
-  995 C4F4: BD 88 D1                         lda $D188, x
-  996 C4F7: 9D 08 38                         sta $3808, x
-  997 C4FA: 9D 08 3C                         sta $3C08, x
-  998 C4FD: E0 27                            cpx #$27
-  999 C4FF: D0 F2                            bne L1
- 1000                                
- 1001 C501: A5 01                            lda $01
- 1002 C503: 09 04                            ora #$04
- 1003 C505: 85 01                            sta $01
- 1004 C507: 58                               cli
- 1005 C508: 60                               rts
- 1006                                    }
- 1007                                
- 1008                                    // moved to Compressor .. F7 = #$88
- 1009                                create_lantern_records:
- 1010                                    {
- 1011 C509: A9 00                            lda #$00
- 1012 C50B: 85 98                            sta zp_lantern_index
- 1013 C50D: A9 FF                            lda #$ff
- 1014 C50F: 85 99                            sta zp_lantern_row
- 1015                                
- 1016 C511: E6 99                        L3: inc zp_lantern_row
- 1017                                        //inc zp_lantern_row
- 1018 C513: A5 99                            lda zp_lantern_row
- 1019 C515: C9 0C                            cmp #$0c                      // $0A is last row
- 1020 C517: F0 51                            beq L4                        // rts
- 1021                                
- 1022 C519: A6 99                            ldx zp_lantern_row
- 1023 C51B: BD E6 C2                         lda VhTbl, x
- 1024 C51E: 85 6B                            sta VmHi
- 1025 C520: BD F1 C2                         lda VlTbl, x
- 1026 C523: 85 6A                            sta VmLo
- 1027                                
- 1028 C525: A0 FF                            ldy #$ff                      // column
- 1029 C527: C0 27                        L2: cpy #$27                      // (VmLo),y
- 1030 C529: F0 E6                            beq L3                        // next row
- 1031 C52B: A2 FF                            ldx #$ff                      // lantern_lookup_table,x
- 1032 C52D: C8                               iny                           // next column
- 1033 C52E: B1 6A                            lda (VmLo), y
- 1034 C530: E8                           L1: inx
- 1035 C531: DD 69 C3                         cmp lantern_lookup_table, x
- 1036 C534: F0 06                            beq L5
- 1037 C536: E0 02                            cpx #$02                      // 0->2 = 3
- 1038 C538: D0 F6                            bne L1
- 1039 C53A: F0 EB                            beq L2
+  969 C4DE: A0 51                            ldy #$51                      // 81
+  970 C4E0: A9 0E                            lda #$0E
+  971 C4E2: 88                           L4: dey
+  972 C4E3: 91 6A                            sta (VmLo), y
+  973 C4E5: D0 FB                            bne L4
+  974 C4E7: CA                               dex
+  975 C4E8: 10 EA                            bpl L3
+  976 C4EA: 60                               rts
+  977                                    }
+  978                                
+  979                                    // Copy/Paste (C/V)
+  980                                Copy:
+  981                                
+  982 C4EB: 20 BA C1                     jsr GetV                      //char under cursor
+  983 C4EE: A0 00                        ldy #$00
+  984 C4F0: B1 6A                        lda (VmLo), y
+  985 C4F2: 85 96                        sta CopyBuf
+  986 C4F4: 60                           rts
+  987                                
+  988                                Paste:
+  989                                
+  990 C4F5: A5 96                        lda CopyBuf
+  991 C4F7: 85 97                        sta ChrBuf
+  992 C4F9: 4C DE C1                     jmp WriteChr
+  993                                
+  994                                    // 0
+  995                                MoveToChr:
+  996                                
+  997 C4FC: 20 BA C1                     jsr GetV                      //char under cursor
+  998 C4FF: A0 00                        ldy #$00
+  999 C501: B1 6A                        lda (VmLo), y
+ 1000                                    //		CLC
+ 1001                                    //		SBC #$10
+ 1002                                    //		STA Buff
+ 1003                                    //		INC Buff
+ 1004 C503: 85 FD                        sta Char
+ 1005 C505: 20 6D C2                     jsr Lc1
+ 1006                                    //		JSR Minus
+ 1007 C508: 60                           rts
+ 1008                                
+ 1009                                    // Import Charcters 1-5
+ 1010                                    // 9
+ 1011                                ShowDoors:
+ 1012                                    {
+ 1013 C509: 78                               sei
+ 1014 C50A: A5 01                            lda $01
+ 1015 C50C: 29 FB                            and #$FB
+ 1016 C50E: 85 01                            sta $01
+ 1017                                
+ 1018 C510: A2 FF                            ldx #$FF
+ 1019 C512: E8                           L1: inx
+ 1020 C513: BD 88 D1                         lda $D188, x
+ 1021 C516: 9D 08 38                         sta $3808, x
+ 1022 C519: 9D 08 3C                         sta $3C08, x
+ 1023 C51C: E0 27                            cpx #$27
+ 1024 C51E: D0 F2                            bne L1
+ 1025                                
+ 1026 C520: A5 01                            lda $01
+ 1027 C522: 09 04                            ora #$04
+ 1028 C524: 85 01                            sta $01
+ 1029 C526: 58                               cli
+ 1030 C527: 60                               rts
+ 1031                                    }
+ 1032                                
+ 1033                                    // moved to Compressor .. F7 = #$88
+ 1034                                create_lantern_records:
+ 1035                                    {
+ 1036 C528: A9 00                            lda #$00
+ 1037 C52A: 85 98                            sta zp_lantern_index
+ 1038 C52C: A9 FF                            lda #$ff
+ 1039 C52E: 85 99                            sta zp_lantern_row
  1040                                
- 1041 C53C: E8                           L5: inx
- 1042 C53D: E8                               inx
- 1043 C53E: E8                               inx
- 1044 C53F: BD 69 C3                         lda lantern_lookup_table, x
- 1045 C542: 48                               pha
- 1046 C543: A9 01                            lda #$01
- 1047 C545: E6 98                            inc zp_lantern_index
- 1048 C547: A6 98                            ldx zp_lantern_index
- 1049 C549: 9D 00 C9                         sta lantern_records, x        // ON/OFF
- 1050                                
- 1051 C54C: 68                               pla
- 1052 C54D: E6 98                            inc zp_lantern_index
- 1053 C54F: A6 98                            ldx zp_lantern_index
- 1054 C551: 9D 00 C9                         sta lantern_records, x        // image stored
- 1055                                
- 1056 C554: 98                               tya
- 1057 C555: E6 98                            inc zp_lantern_index
- 1058 C557: A6 98                            ldx zp_lantern_index
- 1059 C559: 9D 00 C9                         sta lantern_records, x        // column
- 1060                                
- 1061 C55C: A5 99                            lda zp_lantern_row
- 1062 C55E: 69 01                            adc #$01
- 1063 C560: E6 98                            inc zp_lantern_index
- 1064 C562: A6 98                            ldx zp_lantern_index
- 1065 C564: 9D 00 C9                         sta lantern_records, x        // row + 2
- 1066                                
- 1067 C567: 18                               clc
- 1068 C568: 90 BD                            bcc L2
- 1069                                
- 1070 C56A: A9 FF                        L4: lda #$ff
- 1071 C56C: E6 98                            inc zp_lantern_index
- 1072 C56E: A6 98                            ldx zp_lantern_index
- 1073 C570: 9D 00 C9                         sta lantern_records, x
- 1074 C573: A5 98                            lda zp_lantern_index
- 1075 C575: 8D 00 C9                         sta lantern_records           // length 1st byte
- 1076 C578: 60                               rts
- 1077                                    }
- 1078                                    // compressor
- 1079                                    // jsr Create Lant Recs after finished compiling level
- 1080                                    // F8 = #$8C
- 1081                                Compress:                         // SEI
- 1082                                
- 1083 C579: A9 27                        lda #$27
- 1084 C57B: 85 A3                        sta zpRowCount
- 1085 C57D: A9 04                        lda #$04
- 1086 C57F: 85 AC                        sta zpScreenHi
- 1087 C581: A9 78                        lda #$78
- 1088 C583: 85 AB                        sta zpScreenLo                // $0478
- 1089 C585: A9 D8                        lda #$D8
- 1090 C587: 85 AE                        sta zpColorHi
- 1091 C589: A9 78                        lda #$78
- 1092 C58B: 85 AD                        sta zpColorLo                 // $D878
- 1093 C58D: A9 C7                        lda #$C7
- 1094 C58F: 85 B0                        sta zpLevelHi
- 1095                                
- 1096 C591: A0 00                        ldy #$00
- 1097 C593: 84 A6                        sty zpPageFlag
- 1098 C595: 84 A7                        sty zpOutFlag
- 1099 C597: 84 A8                        sty zpEndFlag
- 1100 C599: 84 AF                        sty zpLevelLo
- 1101                                
- 1102                                Top:
- 1103                                
- 1104 C59B: A5 A8                        lda zpEndFlag
- 1105 C59D: D0 53                        bne End
- 1106 C59F: A2 00                        ldx #$00
- 1107 C5A1: 20 27 C6                     jsr Fetch
- 1108 C5A4: 85 A4                        sta zpRecStore1
- 1109 C5A6: E8                           inx
- 1110 C5A7: 20 FA C5                     jsr IncScrnPtr
- 1111 C5AA: F0 2E                        beq Repeater
- 1112                                
- 1113 C5AC: E6 A7                        inc zpOutFlag
- 1114 C5AE: A5 AF                        lda zpLevelLo
- 1115 C5B0: 85 A9                        sta zpLevelLo2
- 1116 C5B2: A5 B0                        lda zpLevelHi
- 1117 C5B4: 85 AA                        sta zpLevelHi2
- 1118 C5B6: 20 55 C6                     jsr IncLevPtr
- 1119                                
- 1120                                Nor:
+ 1041 C530: E6 99                        L3: inc zp_lantern_row
+ 1042 C532: A5 99                            lda zp_lantern_row
+ 1043 C534: C9 0C                            cmp #$0c                      // $0a is last row
+ 1044 C536: F0 51                            beq L4                        // rts
+ 1045                                
+ 1046 C538: A6 99                            ldx zp_lantern_row
+ 1047 C53A: BD 05 C3                         lda VhTbl, x
+ 1048 C53D: 85 6B                            sta VmHi
+ 1049 C53F: BD 10 C3                         lda VlTbl, x
+ 1050 C542: 85 6A                            sta VmLo
+ 1051                                
+ 1052 C544: A0 FF                            ldy #$ff                      // column
+ 1053 C546: C0 27                        L2: cpy #$27                      // (VmLo),y
+ 1054 C548: F0 E6                            beq L3                        // next row
+ 1055 C54A: A2 FF                            ldx #$ff                      // lantern_lookup_table,x
+ 1056 C54C: C8                               iny                           // next column
+ 1057 C54D: B1 6A                            lda (VmLo), y
+ 1058 C54F: E8                           L1: inx
+ 1059 C550: DD 88 C3                         cmp lantern_lookup_table, x
+ 1060 C553: F0 06                            beq L5
+ 1061 C555: E0 02                            cpx #$02                      // 0->2 = 3
+ 1062 C557: D0 F6                            bne L1
+ 1063 C559: F0 EB                            beq L2
+ 1064                                
+ 1065 C55B: E8                           L5: inx
+ 1066 C55C: E8                               inx
+ 1067 C55D: E8                               inx
+ 1068 C55E: BD 88 C3                         lda lantern_lookup_table, x
+ 1069 C561: 48                               pha
+ 1070 C562: A9 01                            lda #$01
+ 1071 C564: E6 98                            inc zp_lantern_index
+ 1072 C566: A6 98                            ldx zp_lantern_index
+ 1073 C568: 9D 00 C9                         sta lantern_records, x        // ON/OFF
+ 1074                                
+ 1075 C56B: 68                               pla
+ 1076 C56C: E6 98                            inc zp_lantern_index
+ 1077 C56E: A6 98                            ldx zp_lantern_index
+ 1078 C570: 9D 00 C9                         sta lantern_records, x        // image stored
+ 1079                                
+ 1080 C573: 98                               tya
+ 1081 C574: E6 98                            inc zp_lantern_index
+ 1082 C576: A6 98                            ldx zp_lantern_index
+ 1083 C578: 9D 00 C9                         sta lantern_records, x        // column
+ 1084                                
+ 1085 C57B: A5 99                            lda zp_lantern_row
+ 1086 C57D: 69 01                            adc #$01
+ 1087 C57F: E6 98                            inc zp_lantern_index
+ 1088 C581: A6 98                            ldx zp_lantern_index
+ 1089 C583: 9D 00 C9                         sta lantern_records, x        // row + 2
+ 1090                                
+ 1091 C586: 18                               clc
+ 1092 C587: 90 BD                            bcc L2
+ 1093                                
+ 1094 C589: A9 FF                        L4: lda #$ff
+ 1095 C58B: E6 98                            inc zp_lantern_index
+ 1096 C58D: A6 98                            ldx zp_lantern_index
+ 1097 C58F: 9D 00 C9                         sta lantern_records, x
+ 1098 C592: A5 98                            lda zp_lantern_index
+ 1099 C594: 8D 00 C9                         sta lantern_records           // length 1st byte
+ 1100 C597: 60                               rts
+ 1101                                    }
+ 1102                                    
+ 1103                                    // compressor
+ 1104                                    // jsr Create Lant Recs after finished compiling level
+ 1105                                    // F8 = #$8C
+ 1106                                    
+ 1107                                Compress:                         // SEI
+ 1108                                
+ 1109 C598: A9 27                        lda #$27
+ 1110 C59A: 85 A3                        sta zpRowCount
+ 1111 C59C: A9 04                        lda #$04
+ 1112 C59E: 85 AC                        sta zpScreenHi
+ 1113 C5A0: A9 78                        lda #$78
+ 1114 C5A2: 85 AB                        sta zpScreenLo                // $0478
+ 1115 C5A4: A9 D8                        lda #$D8
+ 1116 C5A6: 85 AE                        sta zpColorHi
+ 1117 C5A8: A9 78                        lda #$78
+ 1118 C5AA: 85 AD                        sta zpColorLo                 // $D878
+ 1119 C5AC: A9 C7                        lda #$C7
+ 1120 C5AE: 85 B0                        sta zpLevelHi
  1121                                
- 1122 C5B9: A5 A4                        lda zpRecStore1
- 1123 C5BB: 91 AF                        sta (LevelPtr), y
- 1124 C5BD: 20 55 C6                     jsr IncLevPtr
- 1125 C5C0: E8                           inx
- 1126 C5C1: 30 09                        bmi NorOut
- 1127 C5C3: A5 A5                        lda zpRecStore2
- 1128 C5C5: 85 A4                        sta zpRecStore1
- 1129 C5C7: 20 FA C5                     jsr IncScrnPtr
- 1130 C5CA: D0 ED                        bne Nor
- 1131                                NorOut:
- 1132                                
- 1133 C5CC: CA                           dex
- 1134 C5CD: 8A                           txa
- 1135 C5CE: 09 80                        ora #$80
- 1136 C5D0: 91 A9                        sta (LevelPtr2), y
- 1137 C5D2: C6 A7                        dec zpOutFlag
- 1138 C5D4: A5 A8                        lda zpEndFlag
- 1139 C5D6: D0 1A                        bne End
- 1140 C5D8: A2 01                        ldx #$01
- 1141                                
- 1142                                Repeater:
- 1143                                
- 1144 C5DA: E8                           inx
- 1145 C5DB: 30 05                        bmi RepOut
- 1146 C5DD: 20 FA C5                     jsr IncScrnPtr
- 1147 C5E0: F0 F8                        beq Repeater
- 1148                                RepOut:
- 1149                                
- 1150 C5E2: 8A                           txa
- 1151 C5E3: 91 AF                        sta (LevelPtr), y
- 1152 C5E5: 20 55 C6                     jsr IncLevPtr
- 1153 C5E8: A5 A4                        lda zpRecStore1
- 1154 C5EA: 91 AF                        sta (LevelPtr), y
- 1155 C5EC: 20 55 C6                     jsr IncLevPtr
- 1156 C5EF: 4C 9B C5                     jmp Top
- 1157                                
- 1158                                End:
+ 1122 C5B0: A0 00                        ldy #$00
+ 1123 C5B2: 84 A6                        sty zpPageFlag
+ 1124 C5B4: 84 A7                        sty zpOutFlag
+ 1125 C5B6: 84 A8                        sty zpEndFlag
+ 1126 C5B8: 84 AF                        sty zpLevelLo
+ 1127                                
+ 1128                                Top:
+ 1129                                
+ 1130 C5BA: A5 A8                        lda zpEndFlag
+ 1131 C5BC: D0 53                        bne End
+ 1132 C5BE: A2 00                        ldx #$00
+ 1133 C5C0: 20 46 C6                     jsr Fetch
+ 1134 C5C3: 85 A4                        sta zpRecStore1
+ 1135 C5C5: E8                           inx
+ 1136 C5C6: 20 19 C6                     jsr IncScrnPtr
+ 1137 C5C9: F0 2E                        beq Repeater
+ 1138                                
+ 1139 C5CB: E6 A7                        inc zpOutFlag
+ 1140 C5CD: A5 AF                        lda zpLevelLo
+ 1141 C5CF: 85 A9                        sta zpLevelLo2
+ 1142 C5D1: A5 B0                        lda zpLevelHi
+ 1143 C5D3: 85 AA                        sta zpLevelHi2
+ 1144 C5D5: 20 74 C6                     jsr IncLevPtr
+ 1145                                
+ 1146                                Nor:
+ 1147                                
+ 1148 C5D8: A5 A4                        lda zpRecStore1
+ 1149 C5DA: 91 AF                        sta (LevelPtr), y
+ 1150 C5DC: 20 74 C6                     jsr IncLevPtr
+ 1151 C5DF: E8                           inx
+ 1152 C5E0: 30 09                        bmi NorOut
+ 1153 C5E2: A5 A5                        lda zpRecStore2
+ 1154 C5E4: 85 A4                        sta zpRecStore1
+ 1155 C5E6: 20 19 C6                     jsr IncScrnPtr
+ 1156 C5E9: D0 ED                        bne Nor
+ 1157                                    
+ 1158                                NorOut:
  1159                                
- 1160 C5F2: A9 80                        lda #$80
- 1161 C5F4: 91 AF                        sta (LevelPtr), y
- 1162 C5F6: 20 09 C5                     jsr create_lantern_records
- 1163 C5F9: 60                           rts
- 1164                                    // first byte of lantern_records = length
- 1165                                    // zpLevelLo/Hi = End Adr
- 1166                                IncScrnPtr:
- 1167                                
- 1168 C5FA: C6 A3                        dec zpRowCount
- 1169 C5FC: 10 13                        bpl RowOut
- 1170 C5FE: A9 27                        lda #$27
- 1171 C600: 85 A3                        sta zpRowCount
- 1172 C602: A5 AB                        lda zpScreenLo
- 1173 C604: 18                           clc
- 1174 C605: 69 28                        adc #$28
- 1175 C607: 85 AB                        sta zpScreenLo
- 1176 C609: 85 AD                        sta zpColorLo
- 1177 C60B: 90 04                        bcc RowOut
- 1178 C60D: E6 AC                        inc zpScreenHi
- 1179 C60F: E6 AE                        inc zpColorHi
- 1180                                
- 1181                                RowOut:
- 1182                                
- 1183 C611: A5 A6                        lda zpPageFlag
- 1184 C613: D0 34                        bne LastPage
- 1185 C615: E6 AB                        inc zpScreenLo
- 1186 C617: E6 AD                        inc zpColorLo
- 1187 C619: D0 0C                        bne Fetch
- 1188 C61B: E6 AC                        inc zpScreenHi
- 1189 C61D: E6 AE                        inc zpColorHi
- 1190 C61F: A5 AC                        lda zpScreenHi
- 1191 C621: C9 07                        cmp #$07
- 1192 C623: D0 02                        bne Fetch
- 1193 C625: E6 A6                        inc zpPageFlag
- 1194                                
- 1195                                Fetch:
- 1196                                
- 1197 C627: B1 AD                        lda (ColrPtr), y
- 1198 C629: 29 0F                        and #$0F
- 1199 C62B: C9 08                        cmp #$08
- 1200 C62D: D0 09                        bne NoColr
- 1201 C62F: B1 AB                        lda (ScrnPtr), y
- 1202 C631: 09 80                        ora #$80
- 1203 C633: 85 A5                        sta zpRecStore2
- 1204 C635: C5 A4                        cmp zpRecStore1
- 1205 C637: 60                           rts
- 1206                                
- 1207                                NoColr:
- 1208                                
- 1209 C638: B1 AB                        lda (ScrnPtr), y
- 1210 C63A: 85 A5                        sta zpRecStore2
- 1211 C63C: C5 A4                        cmp zpRecStore1
- 1212 C63E: 60                           rts
- 1213                                
- 1214                                Exit:
- 1215                                
- 1216 C63F: E6 A8                        inc zpEndFlag
- 1217 C641: 68                           pla
- 1218 C642: 68                           pla
- 1219 C643: A5 A7                        lda zpOutFlag
- 1220 C645: F0 9B                        beq RepOut
- 1221 C647: D0 83                        bne NorOut
- 1222                                
- 1223                                LastPage:
+ 1160 C5EB: CA                           dex
+ 1161 C5EC: 8A                           txa
+ 1162 C5ED: 09 80                        ora #$80
+ 1163 C5EF: 91 A9                        sta (LevelPtr2), y
+ 1164 C5F1: C6 A7                        dec zpOutFlag
+ 1165 C5F3: A5 A8                        lda zpEndFlag
+ 1166 C5F5: D0 1A                        bne End
+ 1167 C5F7: A2 01                        ldx #$01
+ 1168                                
+ 1169                                Repeater:
+ 1170                                
+ 1171 C5F9: E8                           inx
+ 1172 C5FA: 30 05                        bmi RepOut
+ 1173 C5FC: 20 19 C6                     jsr IncScrnPtr
+ 1174 C5FF: F0 F8                        beq Repeater
+ 1175                                    
+ 1176                                RepOut:
+ 1177                                
+ 1178 C601: 8A                           txa
+ 1179 C602: 91 AF                        sta (LevelPtr), y
+ 1180 C604: 20 74 C6                     jsr IncLevPtr
+ 1181 C607: A5 A4                        lda zpRecStore1
+ 1182 C609: 91 AF                        sta (LevelPtr), y
+ 1183 C60B: 20 74 C6                     jsr IncLevPtr
+ 1184 C60E: 4C BA C5                     jmp Top
+ 1185                                
+ 1186                                End:
+ 1187                                
+ 1188 C611: A9 80                        lda #$80
+ 1189 C613: 91 AF                        sta (LevelPtr), y
+ 1190 C615: 20 28 C5                     jsr create_lantern_records
+ 1191 C618: 60                           rts
+ 1192                                    
+ 1193                                    // first byte of lantern_records = length
+ 1194                                    // zpLevelLo/Hi = End Adr
+ 1195                                    
+ 1196                                IncScrnPtr:
+ 1197                                
+ 1198 C619: C6 A3                        dec zpRowCount
+ 1199 C61B: 10 13                        bpl RowOut
+ 1200 C61D: A9 27                        lda #$27
+ 1201 C61F: 85 A3                        sta zpRowCount
+ 1202 C621: A5 AB                        lda zpScreenLo
+ 1203 C623: 18                           clc
+ 1204 C624: 69 28                        adc #$28
+ 1205 C626: 85 AB                        sta zpScreenLo
+ 1206 C628: 85 AD                        sta zpColorLo
+ 1207 C62A: 90 04                        bcc RowOut
+ 1208 C62C: E6 AC                        inc zpScreenHi
+ 1209 C62E: E6 AE                        inc zpColorHi
+ 1210                                
+ 1211                                RowOut:
+ 1212                                
+ 1213 C630: A5 A6                        lda zpPageFlag
+ 1214 C632: D0 34                        bne LastPage
+ 1215 C634: E6 AB                        inc zpScreenLo
+ 1216 C636: E6 AD                        inc zpColorLo
+ 1217 C638: D0 0C                        bne Fetch
+ 1218 C63A: E6 AC                        inc zpScreenHi
+ 1219 C63C: E6 AE                        inc zpColorHi
+ 1220 C63E: A5 AC                        lda zpScreenHi
+ 1221 C640: C9 07                        cmp #$07
+ 1222 C642: D0 02                        bne Fetch
+ 1223 C644: E6 A6                        inc zpPageFlag
  1224                                
- 1225 C649: E6 AB                        inc zpScreenLo
- 1226 C64B: E6 AD                        inc zpColorLo
- 1227 C64D: A5 AB                        lda zpScreenLo
- 1228 C64F: C9 E8                        cmp #$E8
- 1229 C651: F0 EC                        beq Exit
- 1230 C653: D0 D2                        bne Fetch
- 1231                                
- 1232                                IncLevPtr:
- 1233                                
- 1234 C655: E6 AF                        inc zpLevelLo
- 1235 C657: D0 02                        bne LevPtrOut
- 1236 C659: E6 B0                        inc zpLevelHi
- 1237                                LevPtrOut:
+ 1225                                Fetch:
+ 1226                                
+ 1227 C646: B1 AD                        lda (ColrPtr), y
+ 1228 C648: 29 0F                        and #$0F
+ 1229 C64A: C9 08                        cmp #$08
+ 1230 C64C: D0 09                        bne NoColr
+ 1231 C64E: B1 AB                        lda (ScrnPtr), y
+ 1232 C650: 09 80                        ora #$80
+ 1233 C652: 85 A5                        sta zpRecStore2
+ 1234 C654: C5 A4                        cmp zpRecStore1
+ 1235 C656: 60                           rts
+ 1236                                
+ 1237                                NoColr:
  1238                                
- 1239 C65B: 60                           rts
- 1240                                
- 1241                                    // note: to find color ram in vice, search for 0 hi nyble instead of f ie.. 02 04 06 08 01 03 05 07 09
+ 1239 C657: B1 AB                        lda (ScrnPtr), y
+ 1240 C659: 85 A5                        sta zpRecStore2
+ 1241 C65B: C5 A4                        cmp zpRecStore1
+ 1242 C65D: 60                           rts
+ 1243                                
+ 1244                                Exit:
+ 1245                                
+ 1246 C65E: E6 A8                        inc zpEndFlag
+ 1247 C660: 68                           pla
+ 1248 C661: 68                           pla
+ 1249 C662: A5 A7                        lda zpOutFlag
+ 1250 C664: F0 9B                        beq RepOut
+ 1251 C666: D0 83                        bne NorOut
+ 1252                                
+ 1253                                LastPage:
+ 1254                                
+ 1255 C668: E6 AB                        inc zpScreenLo
+ 1256 C66A: E6 AD                        inc zpColorLo
+ 1257 C66C: A5 AB                        lda zpScreenLo
+ 1258 C66E: C9 E8                        cmp #$E8
+ 1259 C670: F0 EC                        beq Exit
+ 1260 C672: D0 D2                        bne Fetch
+ 1261                                
+ 1262                                IncLevPtr:
+ 1263                                
+ 1264 C674: E6 AF                        inc zpLevelLo
+ 1265 C676: D0 02                        bne LevPtrOut
+ 1266 C678: E6 B0                        inc zpLevelHi
+ 1267                                    
+ 1268                                LevPtrOut:
+ 1269                                
+ 1270 C67A: 60                           rts
+ 1271                                
+ 1272                                    // note: to find color ram in vice, search for 0 hi nyble instead of f ie.. 02 04 06 08 01 03 05 07 09
+ 1273

@@ -10,7 +10,7 @@ Workflow:
 
 	x64 -binarymonitoraddress ip4://127.0.0.1:6502 -keymap 1 editor.vsf
 
-	x64 -binarymonitoraddress ip4://127.0.0.1:6503 -controlport1device 1 bruce.vsf
+	x64 -binarymonitoraddress ip4://127.0.0.1:6503 -controlport1device 1 bruce_the_pro.vsf
 
  2. Use [level # 1-20] edit
 
@@ -64,7 +64,7 @@ Editor command keys: (use positional keymap in vice)
 	
 	`   : cursor size (1/2/3 wide) 
 	+/- : move chrset 
-	a/s : black/blue color map (black: floor, blue: pass thru or climb)
+	a/s : black/blue color map (black: floor or obstacle, blue: pass thru or climb)
 	z/x : fill/delete
 	c/v : copy/paste
 	123 : change multicolor background (screen area determined by raster row split / level #)

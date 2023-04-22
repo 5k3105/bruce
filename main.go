@@ -6,6 +6,7 @@ import (
 )
 
 var (
+	//mem_map     = map[string]MemEntry{}
 	map_path    = `./map/`
 	level       = ""
 	emu_port    = "6502" /// x64 -binarymonitoraddress ip4://127.0.0.1:6503
@@ -48,7 +49,7 @@ func save_editor(level string) {
 	level_pointers, level_data := link_byte(map_path, "level", game_level_data)
 	save_file(map_path, "pointers_level", level_pointers)
 	save_file(map_path, "data_level", level_data)
-	/**/
+
 	lantern_pointers, lantern_data := link_word(map_path, "lantern", game_lantern_data)
 	save_file(map_path, "pointers_lantern", lantern_pointers)
 	save_file(map_path, "data_lantern", lantern_data)

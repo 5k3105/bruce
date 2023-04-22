@@ -1,0 +1,77 @@
+editor_compressed_level_addr c700
+editor_lantern_set_addr      c900 		/// first byte is length + 1 ?
+editor_screen_addr           0478
+editor_screen_length         880
+editor_color_addr            d878
+editor_color_length          904
+editor_cset_addr             3800
+
+/// cset123 a000, a800 b000
+
+game_level_slots    	20
+game_level_pointers 	4b32 			/// ?4 /// lo 20 hi 20
+game_level_data     	68f9 			/// - 817f LEN(6278)
+
+game_lantern_pointers 	4ce0 			/// ?2 /// lo/hi word
+game_lantern_counts   	4cce 			/// 20
+game_lantern_data     	4d0a 			/// ?c /// - 4e94 $188 LEN(392)
+
+/// wait time bruce yamo ninja (per lvl)
+
+/// Color
+game_color_pointers 	4809 				/// $480b lo/hi 20 start @ $47c8
+game_color_data     	47c6 				/// - 47f2 count:44 /// $47c8
+
+/// Raster (4 byte temp raster pointer table split)
+game_raster_pointers 	4831 				/// $4833 lo/hi 20 start @ $47f9
+game_raster_data     	47f3 				/// - $4808 count:22 /// $47f9
+
+game_player_entry_positions 	4bae 		/// (XY) 20 + 20 X 1a Y c4
+game_enemy_entry_positions  	4bd6 		/// (XY) 20 + 20 X 9f Y 62
+
+game_code_init_pointers 		4e9a 		/// lo/hi 20 start @ $33f2
+game_code_init_data     		33f2
+game_code_loop_pointers 		4ec2 		/// lo/hi 20 start @ $3640
+game_code_loop_data     		3640
+
+
+
+
+type MemEntry struct {
+	pointer uint16
+	data    []uint8
+}
+
+game_mem := map[string]MemEntry{}
+
+editor_mem := map[string]MemEntry{}
+
+-----------------------
+
+L2363:      lda #$18				; Ninja waits this long after successful stab
+
+
+L1C3C:      lda ActFace,X
+            cmp #$01				; facing right?
+            bne L1C56
+            jsr L1806
+L1C45:      inc Tmp2
+            lda #$14				; STATE_CHASE
+            jmp SetStateL1D9C
+L1C4C:      lda OLDCHR				; X distance to Bruce (May be Y?)
+            bmi L1C3C
+			
+			; Bruce is above us
+			; Normally we just bide our time, idling
+			; But if you want like in Return of Fury, where
+			; they roam no matter what (and also increase chances of respawning near)
+			
+			; jmp L1C3C	; will do it
+			
+            jsr FaceTarget
+            jmp L1B76
+            
+            
+
+
+

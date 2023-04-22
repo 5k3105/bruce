@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-/// [level(1-20), door(2-5), next-level, x, y]
+// / [level(1-20), door(2-5), next-level, x, y]
 const (
 	doors_player_pos_addr = 0x4bfc
 	doors_next_level_addr = 0x4b5c
@@ -70,7 +70,7 @@ func read_lines(lines []string, schema_seq []string) (map[string][]string, int) 
 	return dataset, len(lines)
 }
 
-/// (door, level)  (next-level, x, y)
+// / (door, level)  (next-level, x, y)
 func map_key(dataset map[string][]string, key_seq, field_seq []string, num_rows int) map[string][]string {
 	datamap := map[string][]string{}
 	for i := 0; i < num_rows; i++ {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-/// [level, enter, wait]
+// / [level, enter, wait]
 const (
 	enemy_entry_addr = 0x4c9c
 	enemy_wait_addr  = 0x4a8a
